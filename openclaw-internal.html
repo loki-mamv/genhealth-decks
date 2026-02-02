@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw for GenHealth — AI Agents That Work Where You Do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAFAFC;--bg-card:#FFF;--bg-alt:#F1F0F4;--bg-subtle:#F8F9FA;
+  --accent:#0B6DEE;--accent-dim:rgba(11,109,238,0.08);--accent-glow:rgba(11,109,238,0.3);
+  --green:#46D19A;--purple:#5A49E1;--teal:#47D6C7;--red:#DC3545;
+  --text:#212529;--text2:#343A40;--muted:#6C757D;
+  --border:#DEE2E6;--grad:linear-gradient(135deg,#5A49E1,#46D19A);
+}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory;overflow-y:scroll;overflow-x:hidden}
+body{font-family:'Titillium Web',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Lexend',sans-serif;font-weight:600;line-height:1.15}
+
+/* Logo */
+.wordmark-logo-wrap{position:fixed;top:20px;left:28px;z-index:1001}
+.wordmark-logo-wrap img{height:28px;width:auto;opacity:.85;transition:opacity .3s}
+.wordmark-logo-wrap img:hover{opacity:1}
+.logo-mark{display:none!important}
+
+/* Progress */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--grad);z-index:1000;transition:width .3s;box-shadow:0 0 10px rgba(90,73,225,.3)}
+
+/* Nav Controls Pill */
+#nav-controls{position:fixed;bottom:24px;right:24px;z-index:1001;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:40px;padding:8px 16px;box-shadow:0 2px 12px rgba(0,0,0,.08);user-select:none}
+#nav-controls button{background:none;border:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;transition:all .2s}
+#nav-controls button:hover{background:var(--accent-dim);color:var(--accent)}
+#slide-counter{font-family:'Titillium Web',sans-serif;font-size:13px;font-weight:600;color:var(--muted);min-width:44px;text-align:center}
+
+/* Nav Dots */
+#slide-nav{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:999;display:flex;flex-direction:column;gap:10px}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:#ADB5BD;cursor:pointer;transition:all .3s;border:none;padding:0;position:relative}
+.nav-dot:hover{background:#6C757D;transform:scale(1.3)}
+.nav-dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent-glow);transform:scale(1.3)}
+.nav-dot::after{content:attr(data-title);position:absolute;right:calc(100% + 12px);top:50%;transform:translateY(-50%);background:#FFF;color:var(--text);padding:5px 12px;border-radius:6px;font-family:'Titillium Web',sans-serif;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12);opacity:0;pointer-events:none;transition:opacity .2s}
+.nav-dot:hover::after{opacity:1}
+
+/* Slides */
+.slide{min-height:100vh;min-height:100dvh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;padding:60px 80px;position:relative;overflow:hidden}
+.slide::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+.slide-alt{background:var(--bg-alt)}
+.slide-inner{max-width:1100px;width:100%;position:relative;z-index:2}
+
+/* Typography */
+.slide-title{font-size:clamp(2rem,4vw,3rem);color:var(--text);margin-bottom:12px}
+.slide-subtitle{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--text2);font-weight:400;margin-bottom:36px;max-width:700px}
+.accent-text{color:var(--accent)}.purple-text{color:var(--purple)}.green-text{color:var(--green)}.red-text{color:var(--red)}
+.accent-line{width:48px;height:3px;background:var(--grad);border-radius:2px;margin-bottom:24px}
+
+/* Animations */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}.reveal-delay-2{transition-delay:.2s}.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}.reveal-delay-5{transition-delay:.5s}.reveal-delay-6{transition-delay:.6s}
+
+/* Cards */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:28px;transition:all .3s}
+.card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+/* Icons */
+.icon-circle{width:48px;height:48px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;flex-shrink:0}
+.icon-circle.purple{background:rgba(90,73,225,.1)}.icon-circle.green{background:rgba(70,209,154,.1)}
+.icon-circle.teal{background:rgba(71,214,199,.1)}.icon-circle.red{background:rgba(220,53,69,.1)}
+
+/* Badge */
+.badge{display:inline-block;background:rgba(11,109,238,.1);color:var(--accent);border:1px solid rgba(11,109,238,.2);padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:.5px;margin-bottom:20px}
+.badge.purple{background:rgba(90,73,225,.1);color:var(--purple);border-color:rgba(90,73,225,.2)}
+.badge.green{background:rgba(70,209,154,.1);color:#2a9d6a;border-color:rgba(70,209,154,.2)}
+
+/* Stats */
+.stat-value{font-family:'Lexend',sans-serif;font-size:2.4rem;font-weight:700;color:var(--accent);line-height:1;margin-bottom:6px}
+.stat-label{font-size:.9rem;color:var(--muted)}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center}
+.flow-box{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px 22px;text-align:center;font-weight:500;font-size:.95rem;min-width:120px}
+.flow-box.highlight{border-color:var(--accent);background:var(--accent-dim)}
+.flow-arrow{color:var(--accent);font-size:20px;font-weight:700}
+
+/* Use Case */
+.uc-header{display:flex;align-items:center;gap:16px;margin-bottom:32px}
+.uc-header .icon-circle{margin-bottom:0;width:56px;height:56px;font-size:26px}
+.uc-list{list-style:none;padding:0}
+.uc-list li{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);font-size:1.05rem}
+.uc-list li:last-child{border-bottom:none}
+.check{color:var(--green);font-size:18px;margin-top:2px;flex-shrink:0}
+
+/* Pain Cards */
+.pain-card{background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:10px;padding:20px 24px}
+.pain-card h4{font-size:1rem;margin-bottom:6px}.pain-card p{font-size:.9rem;color:var(--muted)}
+
+/* Security */
+.sec-item{display:flex;align-items:flex-start;gap:14px;padding:16px 0}
+.sec-icon{width:40px;height:40px;border-radius:10px;background:rgba(70,209,154,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sec-item h4{font-size:1rem;margin-bottom:2px}.sec-item p{font-size:.9rem;color:var(--muted)}
+
+/* Built Items */
+.built-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.built-item:last-child{border-bottom:none}
+.built-icon{font-size:22px;margin-top:2px;flex-shrink:0}
+.built-item strong{display:block;margin-bottom:2px}.built-item span{font-size:.9rem;color:var(--muted)}
+
+/* Timeline */
+.timeline{display:flex;position:relative;margin:40px 0 24px}
+.timeline::before{content:'';position:absolute;top:36px;left:40px;right:40px;height:3px;background:var(--grad);border-radius:2px}
+.timeline-step{flex:1;text-align:center;position:relative;padding:0 12px}
+.timeline-dot{width:20px;height:20px;border-radius:50%;background:var(--accent);margin:26px auto 16px;position:relative;z-index:2;box-shadow:0 0 0 4px rgba(11,109,238,.15)}
+.timeline-label{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.timeline-text{font-size:.9rem;color:var(--text2)}
+
+/* ROI */
+.roi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:32px}
+.roi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:32px 24px;text-align:center;transition:all .3s}
+.roi-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+
+/* CTA */
+.cta-card{background:var(--bg-card);border:2px solid var(--accent);border-radius:16px;padding:40px;text-align:center;max-width:700px;margin:0 auto}
+.cta-card h3{font-size:1.6rem;margin-bottom:16px}
+.cta-steps{list-style:none;padding:0;text-align:left;margin:24px 0}
+.cta-steps li{padding:10px 0;display:flex;align-items:center;gap:12px;font-size:1.05rem}
+.cta-num{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+
+/* Blobs */
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.04;pointer-events:none;z-index:0}
+.blob-blue{background:var(--accent);width:400px;height:400px}
+.blob-purple{background:var(--purple);width:350px;height:350px}
+
+/* Title slide */
+.title-slide{text-align:center}
+.title-slide .slide-title{font-size:clamp(2.2rem,4.5vw,3.6rem);margin-bottom:20px}
+.title-slide .slide-subtitle{margin:0 auto 40px;max-width:600px;font-size:1.2rem}
+.title-decoration{width:80px;height:3px;background:var(--grad);border-radius:2px;margin:0 auto 32px}
+
+@media(max-width:768px){
+  .slide{padding:40px 24px}
+  .grid-2,.grid-3,.grid-4,.roi-grid{grid-template-columns:1fr}
+  .flow{flex-direction:column}
+  .timeline{flex-direction:column;gap:16px}
+  .timeline::before{display:none}
+  #slide-nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Logo -->
+<div class="wordmark-logo-wrap">
+  <img class="wordmark-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA7gAAABmCAYAAADh5T2ZAABFAUlEQVR4Xu2dCXhTVfqHcWYct3FGnUUdNxQE2qSlTVqgbZLeJgEHFUZFFB0dxmXUcVxmxoVFlIJsAi7jMm6jyKJAgbJaKG1yk7ZkKWmSm1B1dP7DOM7ivqHskP93SqPha9omuefeJM33Ps/vCaTN9517C23f3HPP6dePIAiCIAiCIAiCIFRg8OCtP78wzzZrwBBb64C8xgOQyAUxOf9I/tU/r+G18/Jto/HrCYIgCIIgCIIgCCKtDBxYd9yAPNsTA/Ns+yCRAR1p7Egcwe1If8h5ebbwuUPselyPIAiCIAiCIAiCIFRnQGH9zy7MawwwsY0mUcE9IrmN+8/Ns12P6xIEQRAEQRAEQRCEahQW1p904RBb64UxcpuC4LIc6K9p/AWuTxAEQRAEQRAEQRCqMDivcT6TWw6CGzk3r/FfZ5/tOgH3IAiCIAiCIAiCIAhFGTTIdtagPNteXoLbIbn5DXfiPgRBEARBEARxFHcVbfvL3UXbFvWUO+Pk97EZ2rLo/sEtJ+Paucr1hfUnTYRzEs31sSloWvSrBHIt5BptE/1CT2Qlg4bY7hjUKbfcBHdIow33SSuuMtcJoiV8qdMcnu6whJ53WkLr4HGp0yotgMc/Oa2hAvwatRCFncc7q0IXs7HBeJ6F8axlYxMt0kLRHL43nWMjCIIgCIJQEhDYzyGRaO6Kkzvj5I7YDG2J3Fnc9FNcO1e5SeM67deFzZForo9NQVPkOpRfxQkIbuSaAmctrk0Q2cCFQ2zruQtuXuO+fv2qv4N7qY69ShoOslgL+RoS6SX/EK3hWc2G0Km4jhKwsTkt4dXQ96s4Y8HZ6bCEZ6s1NoIgCIIgCDUgweUPCS6R6wzOs7UpILiRMwbWpe/7TLM1dIHDLK2JI4qJ5BMQz3tqxtd8F9flgSgE+jvMoZVx+vYea+hTpzk0SamxEQRBEARBqAkJLn9IcIlcB+R2pxKCe9aQxkG4lyqI1pCVSWoXOUwyILlbGqy+H+H6cnBYdlRB7Y9xrxSyla7mqocoSGdvrZIsDebAb+uF4NyGquCKrVVBER7b4HFnZz6rrwpGIP+G7GTZIgSbt1YGV24RAk9sEaS7N0ONRov3x7g+QRAEQeQqJLj8IcElcp1BQ2xBJQQ3LVdwndbwjSB/B+IIYap5y2YOnoX7pILDHL4e6u2P0yPFhN92jgqfg/sQ8hAF8XuNlkApyOwfQGDXQN6HRKLZ2kM6BffbCN9mS2wqg/+B55bD59yy1RS4EI+BIHKZF4dvv/ivI3yL4uWFbvJcN3l2ROuvcP1089Tw7eOeHN66KDZPxEtp93m8M0+UbB+L6xNEtkGCyx8SXCLXGZxnq1dAcHerfg+u0yyZHXzlNppWtkgV7pcM9pGhSqizL05tufHLHRvRrx+b8t1oDVkbq4J/BYn9JFZocbDUpiS4KJuF4Jt1VcGZW6r8Q/HYCCLX+OuI7fe/OMIXOTrbO/JCN3m+m4Dg/hnXTzdPDds+68lhrZHY/DleSlsjT3STx7/Ng7g+QWQbJLj8IcElcp1BQ2zTFRDcTbiPotjMb5zn4DP1N36s0hLcM1HY9FaHJfxRl5rcEl6OexKJ0Wjx5zdapGdsZunDRrMUaYwjtDhYajkJ7repDEhbhMDv60Z7fojHSxC5AAkuCS6RW5Dg8ocEl8h1BmkaS/kLbsOvcR9FES3Siq7ixzuSEfdNBCbHXWvxjX2kZMF9ie5h99M2WkKbOqQ2NnGEFgdLLXfB/UZ0g19vrgo+WW+iaehEbkGCS4JL5BYkuPwhwSWIjoWmtvISXPhzqF8/FRf5bTJLOpC8w1j6FIgb9+4NcWR7EbzuUJxavNMa6Rc5BvcnjsZeFbyo0SIFuohtJgpuZ+oqg/s2C4EXSXSJXIEElwSXyC1IcPlDgksQ/foNzLdrQG6/5CC4X507xK7H9RWFTdGNI3yKRLQGDbh/T8DYFuMaSoXdg4z7E0cQhdAQm1mqg0RYuohtJgtuNOyKrkmavlHvOxEfH0H0JUhwSXCJ3CJbBPfWoc3Tbh3aspPlljj5bbwUtuy8CWdo8424Nm9IcAniCAOH2EaB4O6VIbhfnZdnvxjXVRSf3ncsyN3nWPaUitMqLcBj6A62Gq+Dw3ZFiUa0hJ/AY8h16kdJJ9nMoSdBavdH5TZrBZelkkV69/XKwEh8rATRVyDBJcElcotsEVyQ2MdAbiMst8TJb+MFhPLmLmn5A67NGxJcgviWwYMbC0Fsw8kK7nnwmnPz7RpcT3E697ztInvKJfw2HkN3iNaw0PX1iuYfeAy5DNvqB2T27Vix7RuC+02eX1/x1sn4uAki2yHBJcElcgsSXP6Q4BIEpua7Fw6xXzEgz94Agvt1D4K754L8Rvt5QxrGqb4lUBSnJXxPHNFTModFYefxeBzxEM2hO+K8XtF4Rr+T8yvvsi1/bObQNHzVtg8KbuT1SumNjUJoCD4HBJHNkOCS4BK5BQkuf0hwCaJ7BEH83sA8m25Avm30gCGNE1nOH2Ibc36+bdjAgXXH4c9XHdEiLcSSp3Sco6Tz8Tji4bBIc/BrlY69ShqMx5FLNFh9P4Jz0GCPI7V9U3A78uXrVYFf4nNBENkKCS4JLpFbkODyhwSXILIY0RJahiVPhZThccTDYQ29HOe1isY+MlSJx5ErNFjbzwWxDTO5zTHBZTm4ySTdhM8JQWQjJLgkuERuQYLLHxJcgshiQHCfw5KndJos4UI8jng4raGn8GuVjr0qpO4S1hkCSKvObgn9Nyq3OSi4LIchf8TnhiCyDRJcElwityDB5Q8JLkFkMU5zeDqWPKUjCr6f4HHEw2EJT8GvVTotI/0/x+Po64hCuMRuDn0RK7c5KrhHJFcI/AafI4LIJkhwSXCJ3IIElz8kuASRxTit4Rux5CmcryP9IsfgccRDtISvi/N6JbOPLbCEx9GXabT480FmP8Jym8OCy3JgkylQjs8VQWQLJLgkuERuQYLLHxJcgshibOY3zgOxOxxH9hSKtBGPoTvY1VSHmmOzhurxGPoyjdbQBSCy/8ZiS4Ib3Fo3+p30rwBHEClCgkuCS+QWJLj8IcEliCwH5M7fRfYUimiWbsb9e8JhCXtxDcVilX6H+/dV2GrJ8LV4G0ttzguuKdiyUe87EZ8vgsgmSHBJcIncggSXPyS4BJHliObwvV1kT5l8lej9t1FAcO+KU0eJ7BaF9jNw/76KwyytEWNkNl6w1HIU3A9AXldvNQfnbRWkmxuEgNARU1velqqgZjP8eas5ML5eCEwEsZ1bL0gN8Pglllreggt/b2Pij88VQWQbJLgkuERuQYLLHxJcgshyXGWuE0Dw3osjfbwzE/fuDTZV1GGR/hmnFteI1tA83Luv4rCG/ihaJHY1vYvUKii4ga1C8B52zy8eTyJUV0e+s1UIFG2uDNy3pTIgKSC47RuTfPOFIDIVElwSXCK3IMHlDwkuQfQBVFhs6oOWirdOxn0TQfnFpsIfiULgFNy3LyJapREgt/tVEtz9jebgosYEt4VKhjpTsLi+MvjnLZXBTzgI7v+tr8i91bOJvgsJLgkukVuQ4PKHBJcg+gggesu7yh+X7HdYdlThfsngsEpL4tTlkYNOc3gU7tcX8el9x4LUhjvkVlnBPby1Snql3iSdj8fAG/bGBEjsXMhuLLYJCu57m4VAf1yXILIZElwSXCK3IMHlDwkuQfQROqcqb48jgTIj3Y57JcuRqcohd9fa8uK0SHfjXn0Vh1W67xu5VUhwbVXBcIMQNODeSrPRHDwLZPavmyuDh5IQ3A82CqEhuFa2UmP1/WiNUdKtNQSEtabgVbWmwMRo1hiCl6+C51cLviG5thWWHBYP8/54acX2wUsN24VvMsKnWzQi0H9RBs/6IMHt24JbrWn//pxiT/7cErcwp8Q9do7eOzGauSXea9jzs0tbi6o14g/wa3MBdn4mF7n7T9G7hkwrcgvRTNG7h0/VN52JP78vQILLn0wT3PEa8YzxBc6CCdpm4crOXF0oaicUif2vL6w/CX8+wR8BvqeOGCL2N2jsQw1aUYimXCMWlWm2nIY/n8ggXBe1n+Y0hxqxCKaY/U5L6FbcI1XYAkBOS3hLnD6p5IBoDt2Be/RVnKPC54DU7lJUcKuCT6d7e506s2QGqf1XAoL76etCoAi/PltgMrve5B9bawwsWGcMtMDjh5BId1lzdA6vMQT+VmsIrFxTEby11hAchOvnIs/rfccuKfNXLiv3Pby0vM0B+WhJeVukuyw+kv8uLve/vriibcHiCl9Vprx5QILbdwT3yYHvHDdf5zU+UuJ9YF6Jd9NcvfvduXpPBGdON5mt9/x3Vol3MzxOmaXzjMiUf6O8qNb7TpxW4rl4qt7z4FSde/0Dxe73H9C5I1NZil1dMuVI9kMCU3TuF6YUuSfeo8/+9RdIcPmTTsFlwnpVgfPiq7XNT1xV0NQK+RwSiWY8ypVH8s6VGue6K7XO6nFasQTXJJLDom083aS1X2HMFxdU5DtshnzHF4Z8MVLRmfKYlH2bXSPyHNuGa8THR2hsY8rOdp2A6xJpRBTE74mW8BMggYfiiGGi+a9oDQu4tlzYD2eQs4VQ/2CcnonmA9EasuLafRk4ZyuOklu+gru7oSp4Fe6ZLtYKgVO2CMEVPQjurjpBGoFfl+nUlLWfttYQvGWtMeCARGKDhRYHCW4EBPebrD6St1cb2h5YZ2o9B/dVm+UVfjdkJ85rFW095tWYLCv3X4nrdsdSg3/oknLfk0vK/Z+A1EZig6U2juCi+D5eXL795SXl27W4j5qQ4Ga34LIrkPNKPL+cp/euBKndDYlEg8U2AcHF+Xh2iefpmaWtpbhvtlDdL/KdacVu6zS9ZzHI7FdMaHF6EdyjMrnYdQhim1S8bQI797hfPCYVu9rvL3btjOa+OLmnuxRtO5LibSFcN1XSIbi3a53n/G5oy06c2+Lk1m/zBR/Bbf7kpsKWnTg3xskNMflNYYsRH0d3pENw2dXZqwualkH2QCIssWLbi+BGQG47Mu5I3h2naXp0/FDbWbgPEZ+yMtcJlRrHNSaNWGfUiAcgERDcCBPbaHoR3MiIb2KPDNfYdw/Lt68szbdbcK94DBvSOEifb9+p60xxTIpiMjQmhTEpyLd1RKuxLcG15XBhnm05ZOeALmnsyAUxOT8m/TtzXmf65zVkxu/e9qodQ1O4Yvol5KH6UZKi0yXEUZIW+tTF6d9TdkFmpLrYVbbitIbzHBbpkEKC+1mjRUr4B4aabBGkm0FwDyDB3VNnksz4czOZWhCwdUb/ChDZfVhsOQouxM9yeHWFf90ao0+Hx6EWILP/hkRwQGJ7zKuxKff1uqf1shHbK5ZVtDVgqZUpuB15pdx3+JXyttWvVLRqcF81IMHNTsGdPdxz+iOl3nmQTx+JkVrOghuZ9W0Cs0o84yL9IsfgsWQi1YL4vWk6163T9O73poHAsmCxTVFwY/OfScXuO+8cWNfjbCSQ2q8gkWjui5N74+QeFpDJznyO66ZKOgT3dwXNF4DQRnBui5Oo1MYGy22Sghu5KU5ujJMbYvIbbctIfBzdoabgXq11XjGhoEmCdEhtbLDcJiG40ewdp236y9jBLbSYZjdY9Q0/qtTa55g0ji9AbiMsHXIrV3BjMizPLpVq7Vfg3rGU5IlaENyIrjPFMSmKydCYFMYE5LYj2jxbPa4thwvz7CIIbmRgTAZ0pLEjF8Tk/Jj078x5nek/pEHAtdNKkyVc6DSHpzuO3J97OI44fgEivNpplX7dbAidil+vJJ2i+6DDEvZ2MzYm3LVOizSRTb/Gr88FQG4Xd5FbPoL7eYM1WIz7ZRL1lYGRILVfdAru/teF4KX4czKVtYY2/TpjYBMkwoKlViHB/SarDG2bVpja8vC4lIaH4L5W7v8TrhvlVcP2C5aVtdUtAyFlwVLLSXCj2bd4hO9PagsECW52Ce780tYz5pe0Pg1Su4eJbTRYbhUQ3M64ww/rvBn9vXGa3nXZNJ3nrajYKii4HYHn/z5J57oIjyMKCS4JLg/BnVDYPBykto2JbTQKCG40n47TNI3DY8hl9HrfsVVa+12VGvGjyk6xVUxwO1Oab3dC4r75TYKbZkSh/QxxZHtRszV0gW+M70T88XTSaAmfzq4828zhAUpfRc4GRCHQX4xuC4QTR2qTENw9DdaAgPtlIq+bQgUgt/+EXI0/lolsMoROXWcMPgtSeygqt+kQ3COS698HH5u1SBCPx+NUCj6C2/YArsumNb5a7p8EUrs7KrcqCG7klbKOx63Lhnt+iMekFCS42SG47JabBfrWu0BmP48VW/UF90geLvGsqR7uORuPM51ML9z2swd1ni0PIrFVWnBZJhV3yOuz1XG+/5HgkuDKEdwxet+J1xY0P31NQdOhWLlVUnCviEbjfH58H7sXPxUs2sZCQSO+CYkwuVVRcFn2Qe7CYyLBJYgEcZhDT3YRWw6CazMHr8e9Mpl0L36VKGzhqPXGwIexYptmwe1M21u15ZIq95XyENxlhrZZsTVfE3w/AZmtjxVbVQW3I9tdL1W0qHJ7BAlu5gvuQr1vCEisf34csU2b4B7JF7P03vF4vOlgWolbALH9D5PbdAluZ7ZPQeJHgkuCm6rgXj20eRCIbeiajo8dLbeqCO6RLMtlyTVrHL8Fsd3N5DZNgtsRkNll7CpydFwkuASRAO3j27/vsEgfdxFbmYLbaJEW416EPNjCbutMgQWQw1hsM0NwO/JVTUXgWjx23vAQXMhj0Xpsm59lFW3vYrFVX3DhY2Vt255U4c0WEtzMFtwFJZ4JILZfMrnNQMHtyEy991F2zyseu1o8qPdMBqk9GJXbNAtuZJLO9dY9xdvOi46PBJcENxXBnVDYZAGp/SIqt2kU3MjlBc5XYg43Jxg9sO64Kq24rKpTbNMtuCUdEev0+o0ds2FJcJPEZn7jPLZqMLsPFR6nOS3hm5xVoYvZVF78ubkOm9bsNIdMcI6uZnvkHkn4atEaNLB9gvHnZzLOKmmsA0utfMHdKQrtObm3olIc2fIn4IRE1rEY4wdLbRoEN5pp+Bh4wkdwfc+yWq+WB4rg7x+A4HYR23QILsuisu2P42PmDQluZgouuxd7fqlnYVRsM1lwOyRX56l7LA0/90BmZ8eKbUYI7pG8F5VcElwS3GQFF/78SxDaPbFym1bBhVymdd6Ej7uvckRuHa8zuc0swe1Is9BfPJ4ENwFEQTrbYQnNhEhxFl6Kzb8clvAz9qqQHtfIFXx637FM/p2W0CY4H3vinKNodsO52uAwh69nV9xwnUzDYZVqeAuuvUqiBQo4Umf0/xTE1s/kNosEl31sLj4WXvAQ3Ncq/K+wK7fw5487pixnlOD6Dr9c1tbt4jU8IMHNPMFl99uCzL6E5TaTBbczYrVGVO1NzYf07nlYbDNIcNnzEjsfJLgkuMkI7q+0zlHw5/1YbtMtuJBd4/KcF+Jj72sweQSp3RyV2wwU3IhOY1tOgtsDbKVgkLD5vYha/JhDK0Vhx0Bcsy/Drs46rKF3upyL3vM3OF8ZcZ9SPDyjPT8Eud3DU3DtVSER9yFSZ70lfPp6U/DNqNxmk+B2xOifiY+JB5wEV4TH/4v+PcMEl2Xn8zH33fCGBDezBJctcLZA712JxTZLBDcys0NyE9sfVg7Tiz0zHkJSm2mCywLyugGk9msSXBLcRAQX0g758ojsdk2aBZeFqwxlGuz7r1njqDPHyG0mCi4TW3hcQYIbB3YVFsTrvTgylkz2QRqaRvsT/iaXjXRMQzaHPoxz/EkmvDzTVpJmOMzSGCa3PAU3W1ZNzgY26n0ngtC2xspttgluzZFwX2yMh+DiZKDgRl4u234rPnZekOBmluAuKPX8eUEcsc0iwYVH9yv4uHhSXeweC3J7OBsEN1ZsSXBJcBMQ3G+C5TZDBDdyhaapAh9/XwHEdhYIbiQbBDcaEtwY2NVEEK6vuwpYahEtob1s79u+JrpseyOnJbQOH6/MtDVd9MaZuFc6cVqlBTwFt9Eibcc9iNRg7yaCzK7Dcpulgru3ptxfho9RDrkiuIvKff9SasEpEtzMEdwFJZ4/MLnNdsHtkFyd9z58fDyYpt824CGd5zMmtyS4qUGCS4IrR3AvL3Da8PH3Baxa+yUgt4dIcOWRNsEVrWEBJGt/HPHiETbV+SUmhrhvtsDul3WYw5c7zSFHnOPjEqc15MukRahgTK08BTfbtgXKZNZV+h/CYpvFghupMfrfWcJxz+mcEdwjUeQ2BxLczBDchaWtJhDbg31FcCH7qktbuf4ucOfAuuMe0nsCUbklwU0NElwSXFmCeyR5+BxkM+Y823kWjeOTI3JLgiuHtAiuKAT6Oyzhj7BwKZQdkAdt5vAAPI5Mg61WycRftISeU+38WEOv4XGkg5aKt04GsT3AUXB3s5q4D5E86wzScBDZA1hss1pwWSr8f8HHmiq5JLgvl/mO2h+RFyS46RfceXrfj0Bq/xmV2z4iuCyhJ0FK8fGmykN615RYuSXBTQ0SXBJcuYJ7mcahyLoa6cKica6zfCO3JLhySIvggljVdREtddIO8vRnuzV8SaZsG9NibT/XaQ3f6DCHXoXxfRBnzMrHHL4cj0ttRGtAiMotD8FttEircQ8iedgWVBtMgXew1PYJwTX4D6+oaBuBjzkVcklwIXsXCYFT8DmQCwlu+gV3QYlnaazc9iHBjczUeafi402FB4a6zgKh3UWCKx8SXBJc2YKrdb6Dz0G2MlLrHMXklgSXD6oLrn1kqLKLYKUnByFBB5vKbA7d4bDsKG02hE7F4+WJzRw8C0R2tMMSngJ9ayHvxhlXOvIG2w4Cj1dNQFxv5iy4ObNPmpJsMAZnbIgjtZwE9+NaY3A5PN63ziCNWVseKForBPpHs7oiqFlt9I+rNQTnwmNIAcFlacLHnAoqC+5/QGSXLqnw37aszHftUsN2IZplFf7RS8ra/rC4rG0lCO2XCgluZFH59gn4HMiFp+BC3nhuuG8RzrNJ5plu8vTw1qTyJMuw7VImC27n1OSj5Jaj4O4Bcd0CjzPn6r3j5xR7y+YWuftH87B+24DZeu8lc/XuSfB5dhDa/dwFV+/5vFrv+wk+7mSZXux+FcutAoL7PmTN1CLXffDcVZOL3MI3KXZdM7nINQVSC3/+kASXBDcW1QVX2/T2hMKmZydonTfB45UTtM1CNOMLnWOvKmieBDJbD4K7VyHBjVxeKGrxecg29HrfsVaN400VBPedsjzxlfJ8x53l+fZfjtCKwjfRiBNBdueC0G4errHvJsFNUnBBpsQ4gpVJ+QQE1Mum7rJFj0RraBrbb1a0hC/tmD7cEWkEm2bN0mwNXfDt82HBaQ1f5bSGbmGLXbG9ejsWhzKHwo5UtkBSM2bpGvy1UhPRGpzHU3DtVdJg3INIjjpBOhvk9mvOgnsQhHbVepPfxBauwj17YrUpWFxrCLwGgnuYo+Cyqcpjca9kUUFwD4LULl86wqfDvbujRmj/wZJy3z2xottVblMVXN+TuJ9ceArucyzDu+bZbvKXbvJMN3kaRDRenuomWGwzTXDZ/8WFpV4fllsOgts6t7T16gWFyd3vPlvvOxOkdg5kF0fBjczQe57AvZJheolr2PTOVZNxsNimJriuTVOLtl1SneCe9ezzJsHng+xuJMFNDBJcLoK7e0Kh888gsOfj/t1xjbbx9CsLmxaA2B7gLbiXFThvwf2yDWu+eIe1U24VENz9hjz7C4Z8+3Dctzug/g+GgfAOy7f5SXATEFy2urHjyJXTroJFiZcDcZ5TJE5LOK1TekGw13AU3A9xfSJ5QF4XM7nlJ7h+W60hOAj3SZbacn/ZakPwTW6Ca/Bvwz2SRWHBdb06PJDypvavlvvPA7l9k6fgvlK2nfsK5SS46RPcR0u8v15Y0lVuZQjuP+bpvBfhPsnyyHDP2bN1nvW8BBfydXWZ6zTcJ1FAbpdDusgtB8ENTytxC7hfMkzRtRgn61x+LLYkuEfzm/7i8bcVNQtJZei2Gi6CO7T56ZuhXiL5TUyuLWhOeHahCoJbc33htp/hvokyrrB5+Hht00dcBVfjWIT7ZBPsDUaQ278rJLh1hiGNMn7vihxTmi/+CsT2PyS4PSCaQ7/BYqVwlFqlWekcBslT+42AXXWjldn+IxEclmCQo+BymXaay2w0+M4FsT3ASXAP1hr8d+EecmBXJ1cZArVYblMU3MgKY+JXRuOhmOBWtD39vN53LO6XLK8N95wOgvvvrnKbmuBC9sO4uO6lTYKbHsFlixsu1Hvb+QmuZ2m1RuS6xsUcvWcyyOxhLLcpCG5kRorbBk0vbvk5yO1+/oLreemPnHYzqNa0f39S8bYnsdyS4MoDJPYxLoJb2PIHXJs3CgrugWsKm7iMf7xmWxEI7h5ugqt1vIV7ZBMWrXgpk1vOgrsf5PYe3CtVygvrf1aSZ68nwe0Ghzn0QhyxUi5WulqcXHaU4q+ZWoDUvsdPcIOqvJu35aL20xqEgLBZ5WxMIq8L/hI87kTYaAoujMqtTMHdW2sKXoHr84DdN77a6F/BQ3DhYy/h+smgjODynQYM4jqqq9ymLLiRxcPbCnEPOZDgpkdwF5ZsH83klovglnoWMmHGPXjwsN79Oyy3KQmu3vOPZG+PYEwvds1kcstVcIvd03AfHkzSuX4PUnuYBJcPJLgd99v+FveSw/iC5j/xE1znwVs4vBGcLkBs6zkL7l4DSDPuI5/q75Tm2xaR4MbBaQlt6ipViuZwnOco3cRuDf0Sf83UAqT2M36CK03H9ZWg3hwavbUqGKnHEb7Nlh6yuYfUxaby6LzeQzZ1zT/xuHtjfcVbJ280BT7nJLi/wfV5wmYdgNS65Qou5PMaTfv3cf1E4S645W0bU/klvDdAaO28BHfRiLYxuL4cSHDTJbieBh6CO7/EsxTX5g2I60IOghuZWeKuwLV7Yvz4mu9OL3a/z1Vwiz0zcB+eTCpy3U2Cy4ecF1xt03zcRy6jB9YdB3L7HifBjYxJ4n7gTOKifHEgiO1hjoJ70KBxcP3ZfDTV3ynJty0lwUWARLVhqaJkTkRz+Db8NVMLkNr9HAVX8R8ijCwR3D143L2x3hi8LlZuUxZcg/85XFsJ1pb7BoDY7pYpuJC2X+DaicJZcL+sEVrPwD14sKTMN56X4L5ctv0OXF8OJLjqC+5jZa6zQGwPyRfc1tBjnKbZ9gRbVAmkVpIruNV6zwJcuyeqi1zlUbnlJLgb2L1tuA9vQGwXk+DKJ8cF963xMt787YlxBU0zeAnuZVpRwPWzgVEaxx+jcstHcB1cfjb0hNBfPB6ENkiCG4PTGvJhqaJkTpyW0K34a6YG7CpcrNzKF9wQ16k03ZElghtpsPp+hMfeExtM/g1yBXe9MfBhTZJ95bDG6J8pV3BXyhBynoILz6d0j2Ai1ICEgNTu5iG48HxSktAbJLjqC+7CUs/dUbmVIbiH55W2mnBtpZhT6qqUK7iQpPbOnK53P8xRcP83OYlFg+Rwb6F00qQi1/+R4MojlwX3VwUto3EPXrDtfXgJ7uUa50RcPxsYqXFs5SW4Ro0osiusuIcSDBvSOAgEdy8JbicgLhuxVCkcmqKcTMySgtMaukcUAqfwFNxGS/A63EMJskVw1wttA/HYu4NJKQjtXrmCu84QuB3XVpIao/+nILd7ZAru33DdROEouF+zBbRwfZ68Ut7WxENwIX/FteVAgqu+4D5a4mmRL7ieNbiu0szWuVtlCm5kVmnrObhud1Tr3D5+guu5AddXkvuLt11JgiuPXBVc+PMbuD5fIseA4H7CQ3Ahd+Pqmc6owvqTQHD3chLcg6YCZwHuoST6fHEBCW4nIFHPd5EqJUOLTCUVe1VIj79mauAqc53AU3AhN+MeSpAtgrvRGByGx94d603BK7DcpiC4n23kvMJuIqw2+l+XKbiH1wqBU3DdROAluK8ZfKtwbd68UtH2OCfBfRXXlgMJrrqCO7eg+dTY6cmpCu58ndeIayvNLL37T3IFd4bOdTmuG4+pwz2ng9Qe4iS4QTWmJmNAcL1YbklwEydXBfdabbPi65mML2hq4CO4TVNw7UxnlFa8dGSM3MoRXHh8EddXmqIi8RS9xv45CW4/tsiUNBFLlcLJzm2CzB1XnlXbA7czX6Z3myC2LRI3wVX8hwgjWwR3U1Uw4f0o8erJqQjuWqP/KVxXDUBu/yRTcCPLjX4LrpsIvAR3mcF/I67Nm8Vlvrs5Ce5aXFsOJLjqCm7s6skyBFfhKzzxmVnsHSpbcIs9c3DdeDyk914SK7eyBLfYdROurwb3F2+7HsstCW7i5KzgDm1K+M3xVLlS2/QiF8EtcD6Ma2c6ILczeQmu2ldvo5Tk2Z8mwQUaLW/+2KG+uGVvzCoKujVUg79eagJS+yVHwVX8XUdG1giuIE3AY+8OkFkXlttkBXedMXGh5skaY+ASuYJbYwikNM2Jl+C+VrF9JK7Nm64LTaUsuFtwbTmQ4KosuKWehzkILvfVVROBLWg1q3NfXCy2CQtux0JPvVOt99zLSXA/r07DzBZGtSAeD0L7CQluauSq4F6X13Qmrs+bjoWmtBwEV+tciGtnOiC3q3gIrlEjNuPaaqEf4iwgwe0EZKqhi1xlUsyhD+HRLVpCy+DxEZCtqezKs7MqdLFoDQssTebgMFEI9GexmcMDos93xCJNYIs1Oc3h6Q5z+C8gjuuhTjtkb5deGRSnNXwV/lqpCYzhv7wEt9EiLcb1lSBbBHdjZSChRbfYNjkb4tx/m6TgHl5v9N8Gz09kqZWR1TgVvcU/Q67grqhoS+kXdl6Cu8zoz8e1ebOkYvvFPAT35RE+O64tBxJclQU3ZnuglAW31PPnR/Teib1lDofM6hLPbpmC68PnJB7TdZ6XeAjugzpPWt9Evr/YvZwENzVyVHAPKLFVHebKgqb7+QhuE9d949UA5HYHD8E15Yv34NpqAnL7DxJcQLQGDViu0pR9kDYQ2efY9jhNZkmX7GqzySIK0tl2a/gSp1l6AHqvhbwXZ1zqxxwK14yv+S4er5qA1L7BS3AhLlxfCbJGcIVgQtu5sMWosNimILhounL3qe0la3AM32b1N/l2/9tosNQmI7grjW3L8HlJBF6Cu3xEoD+uzZsl5W1mElwSXBDaf8oW3DiZFydzQSjjZU43mR0nsSsnc1hFmQnu//A5iUe1zuPiIbjpmp4cBeT1RhLc1MhRwd2FayvBOG3zXbkouIIgfg/kdh8XwU3T9OQoJfn250lwO+m8qtlVtJRP0GmVFtitwYt8Y9IzVQjDrgI7LeGbHJbwcshHccaseERL+FI8LrVxWKXXOQruZ9XVyr/zmC2CC8//EY89HusrAyOx2Oaa4MJjIz4viZBNgrvIsF0gwc1twX1e7zsWhPZgjgvuoUSuUIHQfsxDcKfoXUNwbTVh/UlwU4MEVznGFzTdkYuCe1G+OJDJLQfB5fb/MVX0GnEiCW4nLdb2c0Gs3seipVDaIPeznngcmUYEpMxh2VEFovsijPnjOMeiQMKqTOftDYc59CRHwY2IQqAI9+BNtgjuJiGQ0A/VDZXBW7DY5qDgNuHzkggkuPIhwVVPcOfrfQOw3Oag4EaqNe3fx+fmaCLHVOvcBzkI7oFb9L5jcXU1Yf1Bag+Q4CYPCa5y5KrggsSW8hFchxfXVhtdnjiCBDcG+8gdFQ7l7kv9SrSEnhZHhdL6jqkcfPDDyG6VxoGANsc5Pl5xp3Pl5FicFulunoLbCPVwD95ki+Ameg/uBmNwBhbbXBNcSAs+L4lAgisfElz1BPex0tZKLLc5KbiCeDw+N7HcWyidhOU2RcF9G9dOByC175DgJg8JrnLkquCO0jjNXAQ3X1yKa6tNmWbLaSS4CGeVNBYka1cc8UopIElfO6zSfWKKe1lmKuz+YBDdDfh4Zca1bZT0M9wrXTjM0hiegmszB7fiHrzJFsF9vVK6Bo89HuuN/kex2Oac4Br9Kd2/TYIrH56CC3njueG+RTjPJplnusnTw1uTypMsw7ZLmSK4j5Z4LsZym5OC28uqxtWlrWdguU1NcD0pfV/hzf3FbjcJbvKQ4CpHrgquNd/+Sx6Ca9KIj+Pa6hM5BgT3EAkuoskSLgTZ2hlHwJJImF0JrlV6kah0YxsVMsFxcpjaHV6cKVduozhHhc/hK7jSwa0j/T/HfXiSLYK7ySSNxWOPx3pT8FkstjknuHQFt08I7rMjWv+M66ebp4Ztn5UpgruwxHMlltucFNxeruBOK/JciOU2FcF9oNit+BuuiQBS20iCmzwkuMqRq4I7Uitex0lwM2L/XxDcL0lw49BS8dbJIF4zIF91lbEec0i0hF7JhvtreXLkamfH1kP4fPQccyjMtjvC9TIFENudHAU30mgJKrp0erYI7oYqfyUeezw2GINLsNjmmuDCo4jPSyKQ4MqHBFdFwdV7J2K5zUXB7W33gAeLvUOx3KYiuJD1uHY6uL/ItZEEN3lIcJUjVwUXZPa3PAS3UmufimunAxDcD0hwe0AU2s8AuZkKMubuImexsYbecVjC853WUFqXxk4n7AczCN8EkNaVjp6nee+Cz1vB9rlli1jhOpkEjHUpT8GF7BQF8Xu4Dy8aLeHCrebgoi04QmLZ3ENAZNt4Ce5Ggy+hN4BIcOHR2JbSN1gSXPmQ4JLgqiy4B/F5wdAVXBJcBgmucuSq4NIV3BwT3FgaLW/+WLSGBSZxbJ9ap0WayP7uHCWdjz8312HTjcWR4RK23Q8I4M0sbL9de1VIn2lTkXvCaQneyllw2WJTE3GfbABE9hFOgrs70i9yDK4fD5DVp7HY5prgrjS0bcLnJRFIcOVDgque4C4Y5r0cy20OCu5ufF4wdA8uCS6DBFc5clVw6R7cHBZcIvewV0mDeQsu5G8143vbCiLzALFdwUlww7h2d2wwBmZjsc09wQ3U4vOSCCS48iHBVVFwdV4zltscFNwv8HnB8FtF2fMWrp0OQGrfJsFNHhJc5chVweW2irLGvgTXVpuCguZTaRVlgugFhyUY5Cy4kNAk3CfTAbF9m4fgbjQFV+Pa3bG+MnA/FtsUBPcLyKJo1vaQNcmm4tus/iZtSaWmh6xgMQRux+clEUhw5UOCq57gLtR59FhuUxLcUm/NPL1nUW+Zm2Rmx8msJDOzm1R3ZobO9TQ+L12JHANCe0i+4Lr3Vyt4u0wisP4gtftJcJOHBFc5clVwL8pvGsZFcLWiG9dWm5J82zAS3DTB7sMUhUB/0Ro0sFWbM2l7HHZfLBub0xwut1ftGNpoCZ+OPyeXALmdwl9wpV31o8Ln4F6ZSr1JOp/bIlNCIOEfqBuN/tuw2KYguAc2GUKn4tp9HRJc+ZDgqie484d7LsRym5Lg6r2X4dp9DRDajzkIbmTKUO8gXFtNWP9YuSXBTRwSXOXIXcEVB3IRXI34Ka6tNrp88ToSXBURrdIIEKU5DkvojTgLL7GwrYU2O6yh36otlU3m4DDRGp7Vw9j2sLE5LaFb2cJb+PV9mWZr6AL4uh3uIrbyBJelqbcVMzMFkNpJvAS3zhQsxvW7Y73Q9gsstikILvw9eDWu3dchwZUPCa56gvtYmesEENoD8gXX8wKu3deo1nlcPAT3wWLXr3FtNZmk23YdCW5qkOAqR64KriCI3wO53cdBcCMVhfbBuL6agOA+RYKrAvYqaTjIoRhHGnvKbibDohA4BdfjCVsICvrY4/TvKbtFa2hecw5dFYNz5O4itvIFN9JoCc3EvTINNtugrlJ6l5PgflrdL/GVs9cYfWdisU1JcA2BV3Htvg4JrnxIcNUTXMZCvbddruDO03v/nS1vHKYKCO3LPAQXshTXVhMQ2ldIcFODBFc5clVwGSC37TwEtzLfcSeurSYgt2+S4CqIT+87VrSEnosjiMnkY7s1eBGuLRcmLQ5L+BmofzhOz8RiDX3qMIdG49p9EYdZuqaL2PIQXLN0CB6vwf0yic1Vgdv57YMbWIXr9wbI7AdYbpMWXGNg3zpT9kwJ5wEJrnxIcFUW3BLva3IFt1Nyr8W1+xIgtPdzEtwPb4HfU3B9Nei8//Z/JLipQYKrHDkuuGt4CK5JI27BtdWitKDxAia3JLgKwe6pBQls6iKFqeUgyOQfcY9UEQXfTxzJX1HuLjA26T7co6/Rcc+0RdrZRW7lCy7LvkZryIp7ZgL18O8Y5PYjXoK7UQgkfX8cyOxWLLcpCC6bppxxgqEkJLjyIcFVWXD1rZN5CC4knOhWZNkIyOsYToLL/n4Vrq8G9xe5LsNyS4KbOCS4ypHLgjtKI87iI7iOQ6ZCZ1q2UNXni3NJcBUCpOAkEL9gHBmUFw6S6ypznQC12rrUlp/7ca++ht0i3dVFbvkILsvXDVWBS3DPdMJ+QdxcKb3O5JaT4H5Uo0l+e6QNJv88LLcpCa4x8PV6oW0grt9XIcGVDwmuyoJb4hnJSXAhnutx/b5C5164h3kI7jSdx4nrq8Eknaseyy0JbuKQ4CpHLgvuSI1zLB/BZdOU7fNxfaUZOLDuOBDb90lwFYBJgdMSXh1HAHnkoJzpymxsDnNoZZy6PHLQWRW6GPfsS7A3LkBoP1ZIcFkO2MyhG3DfdLG5MvhoVG65CK4p+BTukQjrjYEKLLcpCi5LSzL3AGczJLjyIcFVV3CfHPjOcSC1n/MRXO9nj5W5zsI9+gogtX4+ggsp8aj6sxuktXJSHLklwU0cElzlyGXBBUn9AVtoiofgmjSOr01ap6q3hpXk2e+Lyi0JLmfYKsNx5I9jwh+luvAUyO0NXetxjDX0qeui9tNw376EaAn9XkHBPRJL8Hl2pR33VpO6ysDsWLnlILiHNgmSFvdJBPbGDAjtfzgJbmStwf8w7tEXIcGVDwmuuoLLWKj3LuMkuPBcq8ikGffoC0wvds3lJbjw3JvVKcyuSQX2BiPI7XYSXHmQ4CpHLgsuA6TWzkdwO/68HNdXiuKBTT8tybd/RoKrAL4xvhNB9P7bRfw4x2kOzcW9e6NzavJ7uBbvOK3SAty7L8FW53RYJElRwe1IMGQzB4fh/kqzEf4Nb6kMLMZyy0Fw1+BeybDR5H+Km+BCak2B3+MeavG83ndsjaHtcvw8b0hw5UOCmxbBvYyX4HZmVTpnbczSeS9XQh4fLHZV8hJclql6tyq/jE/WbatmckuCKw8SXOXIdcEdqXHcz0twO5Iv/gr34E/kmJJ8sQ4E9xu5JcHlCIjnJCx8CmV3svvkOi3he+LUUSJ7Wkb6f4779yXsI0OVigtuVTDSUBU8BHm+0eL9MR6DEmyuDJSCyO7AYstBcA9vNEo63C8ZNhj9lTwFF3JonTEo+572ZFluaj1nlSHgWWXwH15V4Vd0BXISXPmQ4KovuJ374e7iKLgQzwpWF/dSkmpBPH6W3vviw3pPZKbew/2NX7b6MYjtR7wE9wEdk1yXoqtPTyp2jwaxPUiCKx8SXOXIVMG9KK/pzEvzHTdcqnG8eInGIUK2jYbHi/PFFZdonJPG5DXJ+j0ryqgCcQiI7WFegmvUiLuM2sZC3Icneo39QSa3JLgKAXIXiiN8isRpDd2C+/cEfL4P11Aqojl0B+7f13CYpVdVENxovmo0BxeKQvsZeBw8qDeFz9lcGXx+S2XwEJZaHoIL2YB7JkvHNOXKQJCj4EbzSo1Kv/iuNrZdB2L7KSTSmfdry6Wf4c/jBQmufEhw1RdcBojtYzwFd15HWtvm6X3n4l5KMKvYWwJiu4PJbWcOPVzq5r5SfrXePY+n4EIOPFDsGYf78GDy0G2jQGp3R+WWBFceJLjKkWmCOxr+LV2idT4D2Q9SG4nNxSggvK7RBfZKXCNZQGxFjoLL8qFpiLMA9+FBab7t3qjckuAqgCgE+mPRUzh1eAzd4RwVPschZ7/b5LMVj6Gvwe6DFqPbBsXIbLxgqU1BcKPZC1ndUBX4JdtjGY8pWbZWBSo2C9IrILb7toC0smCp5SC4u+vM4QG4dypsNPqvVEBwWf5RawheivvxAmoPWmVo2xQjtjFp24Q/nxckuPIhwU2P4D6u950JcruHr+B2ZNfcEu997DYB3JMH1UWBU0BmF0IOxMhtNP+ZM4zvbJzqInf/ap37IEfB7ZBc+DvX2S2TdK5bQWj3xMotCa48SHCVI5MEd2y+s/hSrfPfkMglLL0LLsvB0VrxXlwrGawa+zjOghsx5osfV+Q7uM1c08P3cZDbJ0rzv5VbElwFcFrCN8URPSWzJ9F9/pxW6ddxXq9k9rF9Y/E4+hpwnGUguPtVFNzYfLm1KripwSzdu7XKX5nI1d06iz9/a6V0TcfVWiH4r6jUxgZLrVzB3WQKPIDHkSqdV3F3KCC4nQk2rjNIYxL9f9UbNWVtA1dX+P+y2uDf31Vsv01NRZsiMx5IcOVDgpsewWU8WuJ9SgHBjeatuXrP7dV634m4byowsZ2t8943S+/5aFZXsf0mM/Wetfi1cpmud63jLLhHpivr3Osng0DjfskwSd9yLojsKiy2JLjyIcFVjkwR3IsLnAUgtruY3CYpuB35hcZxO66ZKAL8Dj9S43iPs+BGDPmOQ5BHrRc0/Aj3TIZSTWNpaZ59O5NbElyFEa1SdRzRUzRNo/0JfQN1WKSp+LVKx2YO9tntGWKBczslTYIb2do1uyA7t5qDIXgUWeqrgoH6KundepDSaLDUKie40hup7HvbExsq/dcoJ7iBSC1kjTHwD8gjtSbJnOz4a4TWM1YZ2m4Aqa2DHIJEWLDUHiW4Bv+e1RVBDa4lFxJc+ZDgpk9wHxnuORsEdy+WW06CGwHBjczTez6bV+J5eZ7OfdU8vS+pX7gWFEonPazzXgpCuwiyi4ltNFhsYwQ3MlPnSer2ot6oLnELSghuZ/ZO1bmemFLsycd9e2LS0BbNpCLX45OLXXshXcSWBFc+JLjKkQmCO3Zwy8kgtW9H5TYVwYXsHa1pSur/biwjNc5J/AX3SNjVXINGnGTMazoT9+2JsiH2ymH5Ys2w/CNiS4KrAg5z6AUseUrHXrVjKB5HPERL6Gn8WuWzoxSPoy9SXR35jlglrcBSmybB/Sb1OILqgrt7Y5U/oX+fyXBky6Bgo5KCe3SCe+BRqjUFaiCz1hgC00F+b15tCkxkqTUEJ9Ua/I+CxK5ZbQj8A9IhtDhYapHgsoTqRvPdzoQEVz4kuOkTXMajJd4HsNzyFNw4eXuO3r0RHhfO1Xmnzy3x3jFH753IMlvvuXtWiXv2bL37VfhzAHIoVmoTFly956uHS7YPxscqBxDc9VhuOQkuu5IbmQoyCQlMAWmdWuS6dlqRW5hW6D2fXeGdVuS5EB6FKUXuiZNBhkFoJSa1scFiS4IrHxJc5cgEwb1U45wWK7cpCi67irsE104Uob94PIjtTiUEl6WCRSMeLM932CCzy/LEy8q0tvIRQ8T+LOV5onaEVhTK8m13DNPYXhyeb/8XJMLklgRXTcG1hJZ2lTxlI1qlEXgc8XBYQy/j1yodpzlkwuPoqzAxAZG1YbHNZcHdBPKHzxMvXjf7zwPB/QJLrTKCe3TW4Bi+zRG5TVlwIW1P4GOVAwmufEhw0yu4bFu2hSUer4qCG5nTTWbHCRbbBAWX/bmN59ZB03WugSC0+xQW3KMyJU6w2JLgKgcJrnKkW3BHD6w7bozW+TEPwYXsv6Sg+VTcI1FG5jvGKyq4kPKYlMVkxDexR5jYRkOCq7Lgsv1fseQpHbawFR5HPByW8Gz8WqXTbAkOwuPoy9SN9vzQbpECWG5zUnCF4HP4/PBmg8l/E5ba7Bdc/2GQ3F/gY00VElz5kOCmV3AZC/W+ISC1e/qS4LLMKPHMx8cqB5DcBSS48iHB5Q8JbnKM0TjNILhHya0MwY2M0oqyFtG0aB1OElw+ZKXgOqyhP2LJUziHE53S6LSEfh/n9YpGFNp/gMfR12F7E4O0hnJacE3SOrUWGFtXGViLxTbLBZflf7y2DiLBlQ8JbvoFlwFSe0dfE1zIoRnFrRZ8rKlSPdzzQ5Dav5PgyoMElz8kuMkxRtM0g6fgQmbiHslQlW/XgOB+TYIrn6wUXPtIyYIlT9GYQ2/iMXSHwyIZu7xe2fwfHkOuwLYPAql15qLg1pmCWxJ904UHG/W+E0FkXVhus1xw2VRlLlsHkeDKhwQ3MwSXAWL7aB8TXJZ/89w6qFrv1oHY7iXBTR0SXP6Q4CbHGG3TyzwF9xdaUfasOnO+4wYSXPlkpeCyfUlB7D6LI3tK5RE8hu5g9zE5LOGP4tRQJubQY3gMuYQo7DwexHZNbgmu1FBT5joBnwulqSlrPw2Etr1vCa4/stLQ9nt8rMlCgisfEtzMEVy2wNyCEs/SPia4EHctPlY5PKj33E6CmzokuPwhwU0OkNsNXAU337ES90gFi8axmARXHlkpuAyHugtNleH+PaHmQlP2kaFK3D/XYG8qiObQXBDcQ1hq+6DgvsTe4MHnQC3WmcLngNS+25cEt8bof4f9G8LHmgwkuPIhwc0cwWU8D99nQHLrsNhmt+B69j2sc+fhY5UDyO2yLBHcv5PgpgYJrnKkW3DHap21nAV3Ke6RCqMK608CyQ1kieD+nQSXI+LI9iIQvENY+Pgn3Ix794Y4StLCaw92rcU3TmvIg3vnMqI1ZAWR/R8W2z4iuIfqTMFJ+JjTwRqj78wNpoC3jwjudhDRn+NjTBYSXPmQ4GaW4DKY5M4v9b6I5TZLBfejmTqvER+jXKoF8XsguLVYbDNMcL1seyES3NQgwVWOdAsuyOxLPAX3Io3zcdwjVYzw7xoEd0cmCy4I7Usl+bY7SHA541D+Ku5hR5JXb6OocRU3l7YHSpT6UdLPQGbrsNxmueC+93plYCQ+1nTCpkivrwwuz2bBXWnwP8drqjcJrnxIcDNPcKMsKPH8AaT2YLYK7gydd1u13ncuPi5e3KL3HQsyuwHLbYYI7htThnl/PLloWykJbmqQ4CpHugV3rNZZzVlwZd/yFItF23g6iO2bmSm4trXj+9V8V6cRf0+CyxlRkM52mEMfYvHjFdEi/RX3TJSWkf6fQ43/4Zr8El6MexLfYq8KXgVS+262C+7rVYHX1gqBU/DxZQogtw9A9mOxzXDB/WCl0T8OH4scSHDlQ4KbuYLLmF/a+gsQ2w+zTHD3Q2awq6z4eHhz58C64x7UeWoyTHCd9+h9P2HjI8FNHRJc5Ui34F6iabqIp+COyhO1uIdcRg7e+nOzRvRnkuDq8+wvCJ3fV0lwFaJz1eJ9XQVQdrbJXaUWapRB9sapLTNhL1tcCfcjjmbjGN+JjZbQTJDbPVkouG9trpLG4mPKRGoFSQsy68Jym4GCe3ilIfAyWywLH4NcSHDlQ4Kb2YLLeKzMddqCktaXs0JwSzyu6pLt3H/Z7I1pOtd9ILYH0i64Re6X2ZXl6LhIcFOHBFc50i24Ywe3nAyC+zUPwYXn3uzXL3IM7sGDsjLXCSC5i9IuuBr7wZI821H/jklwFcRpDV0L4re/qwimnBDbZxX3SQWnNXyVg6/ktrOrw7gP0T31o8LngOA+DjL7VRe5zTzB/XBzVeB2tfa35QVbdXWt0f87kNrPM1JwK/y2GkObHo+bFyS48iHBzXzBjTK/tLUSZPZvWG4zQXDhuXdm6dxX4zGrybQSt/Bgsfv9NAnuF5OL3DfjMZHgpg4JrnKkW3AZILjPcBHcfMcNuDZvhHzxVpDbvWkS3J0lWlHAYyLBVRh2PyqP6cpOS2idKLT/ANeXg9McLofa7+NeSccaet0z+p0f4vpEYmy5qP20BnNoGkjtBxknuJXBv9VVBu/k/W9PbTYKvp+sNwSmrzcGPswAwd2/yhBYWVPuT+k++mQgwZUPCW72CC6jWtP+/UdKPTeA1O7ICMHVebfN1LmvUmM6ciJMLmg+9SG9+0kQ2gNqCS7I7ap7iredh8fCIMFNHRJc5cgEwb04z3YeSO1nMgW3OTplV2lAcgdWahzrVRTcfaX5toUVg1tOxmNhkOCqgHNU+BzRElrmOLI4VFdB7DkfOKzS7yLVke/gujywmYNnsftmHams/MzE3Rq+U6mx5Rps6nmjJXRZY5W0AgT36zQK7t46IbhxS1XgEnYFFI8zmxEF8Xh2RRdE9m0stioI7oerKtpmL+ewOnKikODKhwQ3uwQ3lnl67yUgt3b1Bde792GdZ8lMnUex2RlyAaHNm6Zz1SspuFOKt22domvpcYVoEtzUIcFVjkwQXMYYTdM4ENtDKQruvy8dajsL11QaIU+0guDuUFBw9w/T2BfDxwfi3rGQ4KqI0xosBil8FeTwiy6y2DXtDos0Va0rZ02WcKHjyOrPn8cZC85bkAfpqq1y1I+STmoUAr9qqJJehbyLxVYBwf0Kshbk9rq60Z6c+LquNQaHrTMGZ6w1BQIKCu7fV1cEHltTEaxKx/RuElz5kOBmr+BGWTDMez7I7p3zSjwNILb7FBLcT2aB1LJpyNUaUZWf2zx4UO8qANF9AgT3Yyy2KQmuzvXl5CLX85MTlHsS3NQhwVWOTBFcxqVax+Ugt7uSFFxpdKF4Nq6lJiaNzWzSOF4Fwd3DSXD/A4+z9ZqGhFaeJ8FNAz6971i2N6poDt8rWqSFIIuLWJzm8HSHNfRbmzk8AL9GLdjY7CMlCx6baJWqnZbQrc6RgQvxawjlabD6zm2oClzbIASfAuFtaKwK7pQhuExmw1sqpVfrK4N31pmCxTXja76Le+YS60zhc9aa/DetNQSeqDUEtoLIfoDFNgHB/Rrkdjvk+TVG/521prY83EdtXiv3ly03BISu2d5jlqIsEkTFF49bJAROYZLbY0b0npcM/qG4thxeLm09B2RWSCbPdpNnytp6fMc5HTwF8vcUjC02j8dLSe9ZWOyPOw01k3ikouXkR0pbr3ik1DsPZHYd5G8pCO6h2Xp3eLbeu3K2znvfnFJXZbZ/D2WrLT+gc10+FWT3gWK3F8R2X4KCexgSmgpSO0XnurRa7zsR1+6J+we3nMz2wo3NvUmluSP3DG0x4NqpcjfU+gPU7Cl3JJDYxbSU4BbttgG3QZ/ucnOiUUGE2DTZ30CvaK6LjTaJFDp6nBHAi/FDXWddqRWFRHNZNxnby1XGRBlT6Dz/0oKmF0Bw9/UiuB9cnO/403hN+/dxjXRhKGg+1aC13whC+1dIOAnB3QNy2wqPc4flNxrZ1j+4dk8MHWQ7i92bG01RktFqGzrTWIhry+FCjVg0EOQ0kTCJ7TZFYsbuZEIQsmC/UG01BS5sEAJCvSBdWS8EJrJsFYKTGgRpOkjspOhz8PEJ9VXScLYfL65DxIetarzOFCgH6RVqjf4JtabAxLXG4B0gstNrDf67VsPfQXh/uQo+XmP05+PXEwSRHTxW5jphbomreG6JW5ij914GmThX7755rs47HR4nsb/PLvFMeBg+DmKrq1bhDZ90w47xwaJtpVP1nqopevdEkN7bpha5p08pck+FTJxS5LpsKjsXWXS1miCynVGF9SddqnWOAtF9AGT2URDcRZdoxYUXa8TJ8Fx5db/Mv2Vw+MC6Hxo0ogHyiwqNONGQJ94NYjsdcg/7+4h8x+iKfLtGr/AbRLnA/wNcTJ7N4ukfCwAAAABJRU5ErkJggg==" alt="GenHealth.ai" />
+</div>
+
+<!-- Progress -->
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- Nav Dots -->
+<nav id="slide-nav"></nav>
+
+<!-- Nav Controls -->
+<div id="nav-controls">
+  <button id="prev-btn" aria-label="Previous">&#9664;</button>
+  <span id="slide-counter">1 / 14</span>
+  <button id="next-btn" aria-label="Next">&#9654;</button>
+</div>
+
+<!-- ═══════════════ SLIDE 1: TITLE ═══════════════ -->
+<section class="slide" data-title="Title">
+  <div class="blob blob-blue" style="top:-100px;right:-150px"></div>
+  <div class="blob blob-purple" style="bottom:-80px;left:-100px"></div>
+  <div class="slide-inner title-slide">
+    <div class="reveal">
+      <div class="badge">INTERNAL PROPOSAL</div>
+    </div>
+    <h1 class="slide-title reveal reveal-delay-1">
+      <span class="accent-text">OpenClaw</span> for GenHealth
+    </h1>
+    <div class="title-decoration reveal reveal-delay-2"></div>
+    <p class="slide-subtitle reveal reveal-delay-3">
+      AI Agents That Work Where You Do
+    </p>
+    <p class="reveal reveal-delay-4" style="color:var(--muted);font-size:.95rem">
+      One gateway. Every platform. Zero context lost.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 2: THE PROBLEM ═══════════════ -->
+<section class="slide slide-alt" data-title="The Problem">
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge" style="background:rgba(220,53,69,.1);color:var(--red);border-color:rgba(220,53,69,.2)">THE PROBLEM</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">Things Fall Through the Cracks</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">Context is scattered across Slack, email, CRM, and spreadsheets. No single system connects your conversations to your workflows.</p>
+    <div class="grid-2 reveal reveal-delay-3">
+      <div class="pain-card">
+        <h4>🔇 Silent Pipeline</h4>
+        <p>Deals stall because follow-ups live in someone's head. No automated reminders, no accountability trail.</p>
+      </div>
+      <div class="pain-card">
+        <h4>📋 Manual Onboarding</h4>
+        <p>Customer onboarding is ad-hoc checklists. Steps get missed. Time-to-value suffers.</p>
+      </div>
+      <div class="pain-card">
+        <h4>🔔 Alert Fatigue</h4>
+        <p>CI failures, deployment issues, and on-call alerts are scattered. Critical signals drown in noise.</p>
+      </div>
+      <div class="pain-card">
+        <h4>🧠 Context Switching</h4>
+        <p>Jumping between 6+ tools to get a simple answer. Every switch costs ~23 minutes of focus.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 3: WHAT IS OPENCLAW ═══════════════ -->
+<section class="slide" data-title="What is OpenClaw">
+  <div class="blob blob-blue" style="top:50px;left:-200px"></div>
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge">OPEN SOURCE</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">What is <span class="accent-text">OpenClaw</span>?</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">An open-source AI agent gateway that bridges your messaging platforms to intelligent agents. Self-hosted. HIPAA-friendly. One agent, everywhere.</p>
+    <div class="grid-3 reveal reveal-delay-3">
+      <div class="card" style="text-align:center">
+        <div class="icon-circle" style="margin:0 auto 16px">🔗</div>
+        <h4 style="margin-bottom:8px">Multi-Channel</h4>
+        <p style="font-size:.9rem;color:var(--muted)">Slack, WhatsApp, Telegram, Discord, iMessage — one agent handles them all</p>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="icon-circle purple" style="margin:0 auto 16px">🤖</div>
+        <h4 style="margin-bottom:8px">AI-Native</h4>
+        <p style="font-size:.9rem;color:var(--muted)">Built for LLM agents with sub-agent orchestration, session management, and tool calling</p>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="icon-circle green" style="margin:0 auto 16px">🏠</div>
+        <h4 style="margin-bottom:8px">Self-Hosted</h4>
+        <p style="font-size:.9rem;color:var(--muted)">Your infrastructure, your data. No third-party cloud. Full control and auditability</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 4: HOW IT WORKS ═══════════════ -->
+<section class="slide slide-alt" data-title="How It Works">
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge purple">ARCHITECTURE</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">How It Works</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">Messages flow in from any channel, hit the gateway, and the AI agent responds with context-aware actions.</p>
+    <div class="flow reveal reveal-delay-3">
+      <div class="flow-box">💬 Slack</div>
+      <div class="flow-box">📧 Email</div>
+      <div class="flow-box">📱 WhatsApp</div>
+    </div>
+    <div class="flow reveal reveal-delay-4" style="margin:16px 0">
+      <span class="flow-arrow">↓ &nbsp; ↓ &nbsp; ↓</span>
+    </div>
+    <div class="flow reveal reveal-delay-4">
+      <div class="flow-box highlight" style="font-size:1.1rem;padding:20px 32px">
+        <strong>⚡ OpenClaw Gateway</strong><br>
+        <span style="font-size:.85rem;color:var(--muted)">Routing · Sessions · Auth · Skills</span>
+      </div>
+    </div>
+    <div class="flow reveal reveal-delay-5" style="margin:16px 0">
+      <span class="flow-arrow">↓</span>
+    </div>
+    <div class="flow reveal reveal-delay-5">
+      <div class="flow-box highlight">🧠 AI Agent<br><span style="font-size:.8rem;color:var(--muted)">Claude / GPT</span></div>
+    </div>
+    <div class="flow reveal reveal-delay-6" style="margin:16px 0">
+      <span class="flow-arrow">↓ &nbsp; ↓ &nbsp; ↓</span>
+    </div>
+    <div class="flow reveal reveal-delay-6">
+      <div class="flow-box">📊 CRM</div>
+      <div class="flow-box">📅 Calendar</div>
+      <div class="flow-box">🔧 GitHub</div>
+      <div class="flow-box">🌐 Web</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 5: SALES & PIPELINE ═══════════════ -->
+<section class="slide" data-title="Sales & Pipeline">
+  <div class="blob blob-purple" style="bottom:-100px;right:-150px"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="uc-header">
+        <div class="icon-circle">💰</div>
+        <div>
+          <div class="badge">USE CASE</div>
+          <h2 class="slide-title" style="margin-bottom:0">Sales &amp; Pipeline</h2>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <ul class="uc-list reveal reveal-delay-1">
+        <li><span class="check">✓</span><div><strong>Automated Follow-ups</strong><br><span style="color:var(--muted);font-size:.9rem">Agent tracks deal stages in Attio and nudges reps when follow-ups are due</span></div></li>
+        <li><span class="check">✓</span><div><strong>Pipeline Reports</strong><br><span style="color:var(--muted);font-size:.9rem">Daily pipeline summary posted to #sales channel — deals, stages, next actions</span></div></li>
+        <li><span class="check">✓</span><div><strong>Deal Intelligence</strong><br><span style="color:var(--muted);font-size:.9rem">Ask "what's happening with Aetna?" in Slack and get a full context dump</span></div></li>
+      </ul>
+      <div class="card reveal reveal-delay-2" style="background:var(--bg-subtle);border:none">
+        <h4 style="margin-bottom:16px;color:var(--accent)">💬 In Slack</h4>
+        <div style="font-family:monospace;font-size:.85rem;line-height:1.8;color:var(--text2)">
+          <p><strong>@loki</strong> pipeline update</p>
+          <p style="margin-top:12px;padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+            📊 <strong>Pipeline Summary (Jan 31)</strong><br>
+            • 3 deals in negotiation ($420K)<br>
+            • 2 need follow-up (overdue)<br>
+            • 1 new lead from demo yesterday<br><br>
+            ⚠️ <em>Humana deal — no contact in 8 days</em>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 6: CUSTOMER SUCCESS ═══════════════ -->
+<section class="slide slide-alt" data-title="Customer Success">
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="uc-header">
+        <div class="icon-circle green">🤝</div>
+        <div>
+          <div class="badge green">USE CASE</div>
+          <h2 class="slide-title" style="margin-bottom:0">Customer Success</h2>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <ul class="uc-list reveal reveal-delay-1">
+        <li><span class="check">✓</span><div><strong>Onboarding Checklists</strong><br><span style="color:var(--muted);font-size:.9rem">Automated onboarding workflows — tracks milestones, sends reminders, flags blockers</span></div></li>
+        <li><span class="check">✓</span><div><strong>Health Monitoring</strong><br><span style="color:var(--muted);font-size:.9rem">Monitors customer usage patterns and surfaces at-risk accounts before churn</span></div></li>
+        <li><span class="check">✓</span><div><strong>Proactive Outreach</strong><br><span style="color:var(--muted);font-size:.9rem">Auto-generates check-in emails based on product usage and lifecycle stage</span></div></li>
+      </ul>
+      <div class="card reveal reveal-delay-2" style="background:var(--bg-subtle);border:none">
+        <h4 style="margin-bottom:16px;color:var(--green)">📋 Onboarding Tracker</h4>
+        <div style="font-size:.9rem;line-height:2;color:var(--text2)">
+          <p>✅ API credentials exchanged</p>
+          <p>✅ Test environment configured</p>
+          <p>✅ Prior auth workflow mapped</p>
+          <p style="color:var(--accent)">⏳ Production data integration</p>
+          <p style="color:var(--muted)">⬜ Go-live readiness check</p>
+          <p style="color:var(--muted)">⬜ Team training session</p>
+          <p style="margin-top:12px;padding:10px;background:rgba(220,53,69,.06);border-radius:8px;color:var(--red);font-size:.85rem">
+            ⚠️ Data integration delayed 3 days — escalation email drafted
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 7: ENGINEERING ═══════════════ -->
+<section class="slide" data-title="Engineering">
+  <div class="blob blob-blue" style="top:-80px;right:-180px"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="uc-header">
+        <div class="icon-circle purple">⚙️</div>
+        <div>
+          <div class="badge purple">USE CASE</div>
+          <h2 class="slide-title" style="margin-bottom:0">Engineering</h2>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <ul class="uc-list reveal reveal-delay-1">
+        <li><span class="check">✓</span><div><strong>PR Review Alerts</strong><br><span style="color:var(--muted);font-size:.9rem">Intelligent PR summaries posted to Slack — what changed, who's affected, risk assessment</span></div></li>
+        <li><span class="check">✓</span><div><strong>CI/CD Monitoring</strong><br><span style="color:var(--muted);font-size:.9rem">Build failures get triaged automatically. Agent identifies likely cause and notifies the right person</span></div></li>
+        <li><span class="check">✓</span><div><strong>On-Call Intelligence</strong><br><span style="color:var(--muted);font-size:.9rem">Aggregates alerts from multiple sources, deduplicates, and provides incident context</span></div></li>
+      </ul>
+      <div class="card reveal reveal-delay-2" style="background:var(--bg-subtle);border:none">
+        <h4 style="margin-bottom:16px;color:var(--purple)">🔔 Smart Alert</h4>
+        <div style="font-family:monospace;font-size:.85rem;line-height:1.8;color:var(--text2)">
+          <p style="padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+            🚨 <strong>Build Failed</strong> — main branch<br><br>
+            <strong>Likely cause:</strong> Migration script in PR #247 references a column that was renamed in PR #245<br><br>
+            <strong>Author:</strong> @ethan<br>
+            <strong>Impact:</strong> Blocks staging deploy<br>
+            <strong>Suggested fix:</strong> Update column reference in <code>002_add_appeals.sql</code>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 8: MARKETING ═══════════════ -->
+<section class="slide slide-alt" data-title="Marketing">
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="uc-header">
+        <div class="icon-circle teal">📣</div>
+        <div>
+          <div class="badge" style="background:rgba(71,214,199,.1);color:#2aa89a;border-color:rgba(71,214,199,.2)">USE CASE</div>
+          <h2 class="slide-title" style="margin-bottom:0">Marketing</h2>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <ul class="uc-list reveal reveal-delay-1">
+        <li><span class="check">✓</span><div><strong>Content Generation</strong><br><span style="color:var(--muted);font-size:.9rem">Draft blog posts, case studies, and social copy from product updates and customer wins</span></div></li>
+        <li><span class="check">✓</span><div><strong>Competitor Monitoring</strong><br><span style="color:var(--muted);font-size:.9rem">Daily web crawls of competitor sites, LinkedIn, and news — summarized in one Slack post</span></div></li>
+        <li><span class="check">✓</span><div><strong>Social Media Drafts</strong><br><span style="color:var(--muted);font-size:.9rem">Auto-generates LinkedIn and Twitter posts from company milestones and industry news</span></div></li>
+      </ul>
+      <div class="card reveal reveal-delay-2" style="background:var(--bg-subtle);border:none">
+        <h4 style="margin-bottom:16px;color:#2aa89a">📰 Competitor Intel</h4>
+        <div style="font-size:.9rem;line-height:1.8;color:var(--text2)">
+          <p style="padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+            <strong>Weekly Competitive Brief</strong><br><br>
+            🏥 <strong>Cohere Health</strong> — Raised Series C, expanding into DME<br>
+            🏥 <strong>Olive AI</strong> — Shut down PA product line<br>
+            🏥 <strong>Waystar</strong> — New prior auth API launched<br><br>
+            <em style="color:var(--accent)">Full analysis available — ask me to expand on any item</em>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 9: OPERATIONS ═══════════════ -->
+<section class="slide" data-title="Operations">
+  <div class="blob blob-purple" style="bottom:-120px;left:-100px"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="uc-header">
+        <div class="icon-circle">📋</div>
+        <div>
+          <div class="badge">USE CASE</div>
+          <h2 class="slide-title" style="margin-bottom:0">Operations</h2>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <ul class="uc-list reveal reveal-delay-1">
+        <li><span class="check">✓</span><div><strong>Morning Briefings</strong><br><span style="color:var(--muted);font-size:.9rem">Daily digest of calendar, emails, tasks, and overnight alerts — delivered before standup</span></div></li>
+        <li><span class="check">✓</span><div><strong>Meeting Prep</strong><br><span style="color:var(--muted);font-size:.9rem">Before each meeting, agent pulls relevant context: last touchpoints, open issues, talking points</span></div></li>
+        <li><span class="check">✓</span><div><strong>Task Management</strong><br><span style="color:var(--muted);font-size:.9rem">Capture tasks from any conversation. "Remember to follow up with Ricky about pricing" just works.</span></div></li>
+      </ul>
+      <div class="card reveal reveal-delay-2" style="background:var(--bg-subtle);border:none">
+        <h4 style="margin-bottom:16px;color:var(--accent)">☀️ Morning Briefing</h4>
+        <div style="font-size:.9rem;line-height:1.8;color:var(--text2)">
+          <p style="padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+            <strong>Good morning! Here's your day:</strong><br><br>
+            📅 3 meetings (next: Product sync at 10am)<br>
+            📧 2 urgent emails from partners<br>
+            ✅ 5 tasks due today<br>
+            🌤️ Tampa: 78°F, partly cloudy<br><br>
+            <em style="color:var(--accent)">The Humana follow-up from yesterday is still pending — want me to draft something?</em>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 10: SECURITY ═══════════════ -->
+<section class="slide slide-alt" data-title="Security">
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge green">COMPLIANCE</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">Security &amp; Compliance</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">Built for healthcare from day one. Your data never leaves your infrastructure.</p>
+    <div class="grid-2 reveal reveal-delay-3">
+      <div>
+        <div class="sec-item">
+          <div class="sec-icon">🏠</div>
+          <div><h4>Self-Hosted</h4><p>Runs on your own servers. No data sent to third-party cloud services.</p></div>
+        </div>
+        <div class="sec-item">
+          <div class="sec-icon">🔒</div>
+          <div><h4>HIPAA-Friendly</h4><p>Designed with healthcare compliance in mind. No PHI in transit to external providers.</p></div>
+        </div>
+        <div class="sec-item">
+          <div class="sec-icon">📝</div>
+          <div><h4>Audit Logging</h4><p>Every agent action is logged. Full traceability for compliance reviews.</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-item">
+          <div class="sec-icon">🔑</div>
+          <div><h4>Access Control</h4><p>Granular permissions. Control which agents access which tools and data.</p></div>
+        </div>
+        <div class="sec-item">
+          <div class="sec-icon">🛡️</div>
+          <div><h4>Open Source</h4><p>Full code transparency. Audit the entire codebase. No black boxes.</p></div>
+        </div>
+        <div class="sec-item">
+          <div class="sec-icon">🔐</div>
+          <div><h4>Encrypted at Rest</h4><p>All stored data and credentials are encrypted. Keys managed by you.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 11: WHAT WE'VE BUILT ═══════════════ -->
+<section class="slide" data-title="Already Built">
+  <div class="blob blob-blue" style="top:80px;right:-180px"></div>
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge">PROOF OF CONCEPT</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">What We've Already Built</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">Real examples running today — not vaporware.</p>
+    <div class="grid-2 reveal reveal-delay-3">
+      <div>
+        <div class="built-item">
+          <span class="built-icon">☀️</span>
+          <div><strong>Morning Briefings</strong><span>Daily digest of calendar, emails, tasks, and weather delivered to Slack and iMessage every morning</span></div>
+        </div>
+        <div class="built-item">
+          <span class="built-icon">📊</span>
+          <div><strong>Pipeline Monitoring</strong><span>Automated CRM tracking with Attio integration — deal updates, follow-up reminders, weekly reports</span></div>
+        </div>
+        <div class="built-item">
+          <span class="built-icon">📧</span>
+          <div><strong>Email Triage</strong><span>Reads, categorizes, and drafts responses across multiple email accounts (Gmail, Superhuman)</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="built-item">
+          <span class="built-icon">🤖</span>
+          <div><strong>Sub-Agent System</strong><span>Spawns specialized agents for long-running tasks — research, content creation, data analysis</span></div>
+        </div>
+        <div class="built-item">
+          <span class="built-icon">🔍</span>
+          <div><strong>Web Research</strong><span>Real-time web search, page scraping, and competitor monitoring with Brave Search integration</span></div>
+        </div>
+        <div class="built-item">
+          <span class="built-icon">📅</span>
+          <div><strong>Calendar Intelligence</strong><span>Google Calendar integration with meeting prep, scheduling, and conflict detection</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 12: IMPLEMENTATION ═══════════════ -->
+<section class="slide slide-alt" data-title="Implementation">
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge purple">ROLLOUT PLAN</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">Implementation</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">Start small, prove value fast, then expand.</p>
+    <div class="timeline reveal reveal-delay-3">
+      <div class="timeline-step">
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Week 1</div>
+        <div class="timeline-text"><strong>Setup</strong><br>Deploy gateway, connect Slack, configure first agent</div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Week 2</div>
+        <div class="timeline-text"><strong>Pilot</strong><br>One team uses it daily. Iterate on skills and prompts</div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Week 3-4</div>
+        <div class="timeline-text"><strong>Expand</strong><br>Add email, CRM, calendar integrations. Second team onboards</div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-dot"></div>
+        <div class="timeline-label">Month 2+</div>
+        <div class="timeline-text"><strong>Scale</strong><br>Company-wide rollout. Custom skills per team</div>
+      </div>
+    </div>
+    <div class="grid-3 reveal reveal-delay-4" style="margin-top:32px">
+      <div class="card" style="text-align:center">
+        <div class="stat-value">1-2</div>
+        <div class="stat-label">weeks to first value</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="stat-value">1</div>
+        <div class="stat-label">team to start</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="stat-value" style="color:var(--green)">$0</div>
+        <div class="stat-label">license cost (open source)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 13: ROI ═══════════════ -->
+<section class="slide" data-title="ROI">
+  <div class="blob blob-purple" style="top:-100px;left:-150px"></div>
+  <div class="slide-inner">
+    <div class="reveal"><div class="badge green">IMPACT</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">Return on Investment</h2>
+    <p class="slide-subtitle reveal reveal-delay-2">Conservative estimates for a 12-15 person team.</p>
+    <div class="roi-grid reveal reveal-delay-3">
+      <div class="roi-card">
+        <div class="stat-value">8-12</div>
+        <div class="stat-label">hours saved per person per week</div>
+        <p style="margin-top:12px;font-size:.85rem;color:var(--muted)">Email triage, meeting prep, status updates, context gathering</p>
+      </div>
+      <div class="roi-card">
+        <div class="stat-value" style="color:var(--green)">60%</div>
+        <div class="stat-label">less context switching</div>
+        <p style="margin-top:12px;font-size:.85rem;color:var(--muted)">One interface for questions that currently span 6+ tools</p>
+      </div>
+      <div class="roi-card">
+        <div class="stat-value" style="color:var(--purple)">2x</div>
+        <div class="stat-label">faster follow-up velocity</div>
+        <p style="margin-top:12px;font-size:.85rem;color:var(--muted)">Automated reminders mean nothing falls through the cracks</p>
+      </div>
+    </div>
+    <div class="card reveal reveal-delay-4" style="text-align:center;border-color:var(--accent)">
+      <p style="font-size:1.1rem"><strong>Bottom line:</strong> At 10 hrs/week saved × 12 people × $75/hr loaded cost = <span class="accent-text" style="font-size:1.3rem;font-weight:700">$468K/year</span> in recovered productivity</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SLIDE 14: NEXT STEPS ═══════════════ -->
+<section class="slide slide-alt" data-title="Next Steps">
+  <div class="slide-inner" style="text-align:center">
+    <div class="reveal"><div class="badge">LET'S GO</div></div>
+    <h2 class="slide-title reveal reveal-delay-1">Next Steps</h2>
+    <p class="slide-subtitle reveal reveal-delay-2" style="margin:0 auto 40px">Ready to bring AI agents to GenHealth?</p>
+    <div class="cta-card reveal reveal-delay-3">
+      <h3>Pilot Program Proposal</h3>
+      <p style="color:var(--muted);margin-bottom:16px">A 2-week pilot with one team to prove the value</p>
+      <ol class="cta-steps">
+        <li><span class="cta-num">1</span> Pick a pilot team (Sales or Ops recommended)</li>
+        <li><span class="cta-num">2</span> Deploy OpenClaw on GenHealth infrastructure</li>
+        <li><span class="cta-num">3</span> Connect Slack + 2 integrations (CRM, Calendar)</li>
+        <li><span class="cta-num">4</span> Run for 2 weeks, measure time saved</li>
+        <li><span class="cta-num">5</span> Review results &amp; decide on company-wide rollout</li>
+      </ol>
+      <p style="margin-top:20px;font-size:1.1rem"><strong class="accent-text">Risk: minimal &nbsp;·&nbsp; Cost: infrastructure only &nbsp;·&nbsp; Upside: massive</strong></p>
+    </div>
+  </div>
+</section>
+
+<script>
+// Slide navigation
+const slides = document.querySelectorAll('.slide');
+const nav = document.getElementById('slide-nav');
+const counter = document.getElementById('slide-counter');
+const progress = document.getElementById('progress-bar');
+const total = slides.length;
+let currentSlide = 0;
+
+// Create nav dots
+slides.forEach((slide, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('data-title', slide.dataset.title || `Slide ${i+1}`);
+  dot.addEventListener('click', () => scrollToSlide(i));
+  nav.appendChild(dot);
+});
+
+function scrollToSlide(i) {
+  slides[i].scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateNav(i) {
+  currentSlide = i;
+  document.querySelectorAll('.nav-dot').forEach((d, j) => d.classList.toggle('active', j === i));
+  counter.textContent = `${i+1} / ${total}`;
+  progress.style.width = `${((i+1)/total)*100}%`;
+}
+
+// Intersection Observer for slides
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.5) {
+      updateNav([...slides].indexOf(e.target));
+    }
+  });
+}, { threshold: 0.5 });
+slides.forEach(s => observer.observe(s));
+
+// Reveal animations
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// Arrow navigation
+document.getElementById('prev-btn').addEventListener('click', () => {
+  if (currentSlide > 0) scrollToSlide(currentSlide - 1);
+});
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (currentSlide < total - 1) scrollToSlide(currentSlide + 1);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    if (currentSlide < total - 1) scrollToSlide(currentSlide + 1);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (currentSlide > 0) scrollToSlide(currentSlide - 1);
+  }
+});
+</script>
+</body>
+</html>
