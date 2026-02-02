@@ -892,7 +892,7 @@ h1, h2, h3, h4 {
 <nav id="nav">
   <div class="nav-logo">Gen<span>Health</span>.ai</div>
   <div class="nav-controls">
-    <span class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">15</span></span>
+    <span class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">18</span></span>
     <button class="nav-btn" onclick="prevSlide()" aria-label="Previous slide">↑</button>
     <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide">↓</button>
   </div>
@@ -939,7 +939,7 @@ h1, h2, h3, h4 {
       </div>
     </div>
     <div class="reveal reveal-delay-4">
-      <a href="#slide-5" class="cta-btn">
+      <a href="#slide-6" class="cta-btn">
         See the Platform →
       </a>
     </div>
@@ -985,17 +985,81 @@ h1, h2, h3, h4 {
       </div>
     </div>
 
-    <div class="reveal reveal-delay-4" style="margin-top: 2.5rem;">
+    <div class="grid-3 reveal reveal-delay-4" style="margin-top: 2rem;">
+      <div class="card" style="text-align: center; padding: 1.25rem;">
+        <div class="stat-value" style="font-size: 1.6rem;">$13M</div>
+        <div class="stat-label">VC Funding Raised</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 1.25rem;">
+        <div class="stat-value" style="font-size: 1.6rem;">140M</div>
+        <div class="stat-label">Patients of Training Data</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 1.25rem;">
+        <div class="stat-value" style="font-size: 1.6rem;">$3M</div>
+        <div class="stat-label">GPUs &amp; HPC Infrastructure</div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-5" style="margin-top: 1.25rem;">
       <div class="highlight-box" style="text-align: center;">
-        <p><strong>1upHealth DNA:</strong> Our team built the FHIR infrastructure now used by major health plans and CMS. We understand payer data, compliance, and clinical workflows at the deepest level.</p>
+        <p style="margin-bottom: 0.5rem;"><strong>1upHealth DNA:</strong> Our team built the FHIR infrastructure now used by major health plans and CMS. We understand payer data, compliance, and clinical workflows at the deepest level.</p>
+        <p style="font-size: 0.85rem;"><strong>Government Advisors:</strong> David Sacks, Aneesh Chopra (former US CTO), Don Rucker (former ONC Coordinator) &#183; <strong>Selected by CMS</strong> as one of the original 6 participants in the CMS WISeR AI program</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ======================== SLIDE 3: REGULATORY ======================== -->
+
+<!-- ======================== SLIDE 3: LARGE MEDICAL MODEL ======================== -->
 <section class="slide" id="slide-3">
   <span class="section-num">03</span>
+  <div class="bg-glow bg-glow-blue" style="top: -100px; left: -150px;"></div>
+  <div class="slide-inner">
+    <div class="split">
+      <div>
+        <div class="reveal">
+          <div class="slide-label">Proprietary AI</div>
+          <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">We Trained a Large Medical<br>Model on 140M Patients</h2>
+          <p class="slide-subtitle" style="margin-bottom: 2rem;">
+            GenHealth&#8217;s proprietary Large Medical Model (LMM) goes beyond general-purpose AI. Trained on 140 million patient records, it combines structured medical codes with natural language understanding.
+          </p>
+        </div>
+        <div class="highlight-box reveal reveal-delay-1">
+          <p style="font-size: 0.85rem;"><strong>Why it matters:</strong> General LLMs understand language but not medical coding systems. Our LMM natively understands both &#8212; structured clinical data and unstructured clinical notes &#8212; in a single model.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="card card-accent reveal reveal-delay-1">
+          <h4 style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem;">Evolution of Medical AI</h4>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="padding: 1rem; background: #F8F9FA; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">Classical Statistics</div>
+              <div style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; color: var(--text-secondary);">Age: 47 &nbsp; Sex: F &nbsp; ESRD: Y &nbsp; EKG: Y</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem;">Rigid tabular inputs. Limited to predefined features.</div>
+            </div>
+            <div style="text-align: center; color: var(--accent); font-size: 0.8rem;">&#8595;</div>
+            <div style="padding: 1rem; background: #F8F9FA; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">Large Language Models</div>
+              <div style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; color: var(--text-secondary);">&#8220;47yo female with malignant neoplasm of unspecified site of female breast on metformin&#8221;</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem;">Natural language reasoning. No structured medical coding.</div>
+            </div>
+            <div style="text-align: center; color: var(--accent); font-size: 0.8rem;">&#8595;</div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, rgba(11,109,238,0.06) 0%, rgba(90,73,225,0.03) 100%); border-radius: 8px; border: 1px solid rgba(11,109,238,0.25);">
+              <div style="font-size: 0.7rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">Large Medical Model (GenHealth)</div>
+              <div style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; color: var(--accent);">AGE_47 GENDER_female ICD_C50.919 NDC_72336-064-30</div>
+              <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.35rem;"><strong>Best of both worlds.</strong> Structured codes + natural language in one model.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 4: REGULATORY ======================== -->
+<section class="slide" id="slide-4">
+  <span class="section-num">04</span>
   <div class="bg-glow bg-glow-teal" style="top: 20%; left: -200px;"></div>
   <div class="slide-inner">
     <div class="split">
@@ -1035,9 +1099,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 4: CHALLENGES ======================== -->
-<section class="slide" id="slide-4">
-  <span class="section-num">04</span>
+<!-- ======================== SLIDE 5: CHALLENGES ======================== -->
+<section class="slide" id="slide-5">
+  <span class="section-num">05</span>
   <div class="slide-inner">
     <div class="reveal">
       <div class="slide-label">The Problem</div>
@@ -1082,9 +1146,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 5: SOLUTION OVERVIEW ======================== -->
-<section class="slide" id="slide-5">
-  <span class="section-num">05</span>
+<!-- ======================== SLIDE 6: SOLUTION OVERVIEW ======================== -->
+<section class="slide" id="slide-6">
+  <span class="section-num">06</span>
   <div class="bg-glow bg-glow-teal" style="bottom: -100px; right: -100px;"></div>
   <div class="slide-inner">
     <div class="reveal">
@@ -1136,9 +1200,58 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 6: CASE STUDY HEADLINE ======================== -->
-<section class="slide" id="slide-6">
-  <span class="section-num">06</span>
+
+<!-- ======================== SLIDE 7: UMPA PERFORMANCE ======================== -->
+<section class="slide" id="slide-7">
+  <span class="section-num">07</span>
+  <div class="bg-glow bg-glow-teal" style="top: 30%; right: -150px;"></div>
+  <div class="slide-inner" style="text-align: center; max-width: 1000px;">
+    <div class="reveal">
+      <div class="slide-label" style="justify-content: center;">Performance</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Lowest Time to Review. Ever.</h2>
+      <p class="slide-subtitle" style="margin: 0 auto 3rem; max-width: 650px; text-align: center;">
+        GenHealth&#8217;s UMPA delivers PA review times that redefine what&#8217;s possible &#8212; outperforming both manual review and the leading IPA technology.
+      </p>
+    </div>
+
+    <div class="grid-3 reveal reveal-delay-1">
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem;">Manual Review</div>
+        <div class="stat-value" style="color: var(--text-muted);">17 min</div>
+        <div class="stat-label">Average time per case</div>
+        <div style="margin-top: 1rem; height: 8px; background: #E9ECEF; border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: 100%; background: #ADB5BD; border-radius: 4px;"></div>
+        </div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem;">Leading IPA Solution</div>
+        <div class="stat-value" style="color: #6C757D;">13 min</div>
+        <div class="stat-label">Average time per case</div>
+        <div style="margin-top: 1rem; height: 8px; background: #E9ECEF; border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: 76%; background: #6C757D; border-radius: 4px;"></div>
+        </div>
+      </div>
+      <div class="card card-accent" style="text-align: center; border-color: rgba(11,109,238,0.4);">
+        <div style="font-size: 0.7rem; font-weight: 600; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem;">GenHealth UMPA</div>
+        <div class="stat-value">3 min</div>
+        <div class="stat-label">Average time per case</div>
+        <div style="margin-top: 1rem; height: 8px; background: #E9ECEF; border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: 18%; background: linear-gradient(90deg, var(--accent), var(--accent-secondary)); border-radius: 4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box reveal reveal-delay-2" style="margin-top: 2.5rem;">
+      <p style="font-size: 1rem; text-align: center;">
+        <strong>5.7&#215; faster</strong> than manual review. <strong>4.3&#215; faster</strong> than the leading IPA solution.<br>Powered by our proprietary Large Medical Model trained on 140M patients.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 8: CASE STUDY HEADLINE ======================== -->
+<section class="slide" id="slide-8">
+  <span class="section-num">08</span>
   <div class="bg-glow bg-glow-teal" style="top: 30%; left: -150px;"></div>
   <div class="slide-inner">
     <div class="reveal">
@@ -1189,9 +1302,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 7: CASE STUDY DEEP DIVE ======================== -->
-<section class="slide" id="slide-7">
-  <span class="section-num">07</span>
+<!-- ======================== SLIDE 9: CASE STUDY DEEP DIVE ======================== -->
+<section class="slide" id="slide-9">
+  <span class="section-num">09</span>
   <div class="slide-inner">
     <div class="reveal">
       <div class="slide-label">Case Study Deep Dive</div>
@@ -1284,9 +1397,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 8: USE CASE - PA ======================== -->
-<section class="slide" id="slide-8">
-  <span class="section-num">08</span>
+<!-- ======================== SLIDE 10: USE CASE - PA ======================== -->
+<section class="slide" id="slide-10">
+  <span class="section-num">10</span>
   <div class="slide-inner">
     <div class="split">
       <div>
@@ -1333,9 +1446,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 9: USE CASE - UM & SUMMARIES ======================== -->
-<section class="slide" id="slide-9">
-  <span class="section-num">09</span>
+<!-- ======================== SLIDE 11: USE CASE - UM & SUMMARIES ======================== -->
+<section class="slide" id="slide-11">
+  <span class="section-num">11</span>
   <div class="bg-glow bg-glow-blue" style="top: 10%; right: -200px;"></div>
   <div class="slide-inner">
     <div class="split">
@@ -1406,9 +1519,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 10: USE CASE - CMS 0057 ======================== -->
-<section class="slide" id="slide-10">
-  <span class="section-num">10</span>
+<!-- ======================== SLIDE 12: USE CASE - CMS 0057 ======================== -->
+<section class="slide" id="slide-12">
+  <span class="section-num">12</span>
   <div class="slide-inner">
     <div class="reveal">
       <div class="slide-label">Use Case</div>
@@ -1468,12 +1581,32 @@ h1, h2, h3, h4 {
         </ul>
       </div>
     </div>
+
+    <div class="split reveal reveal-delay-5" style="margin-top: 2.5rem;">
+      <div class="card card-accent">
+        <h4 style="color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;">Da Vinci + AI: Beyond FHIR Codes</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">LLMs go beyond structured medical codes — handling natural language clinical questions that FHIR/CQL alone cannot answer:</p>
+        <ul class="feature-list">
+          <li>“Was the physician’s order kept in the medical record?”</li>
+          <li>“Was the device used for the procedure Medicare-approved?”</li>
+          <li>“Does the beneficiary have plantar flexion contracture of the ankle with dorsiflexion ≥10° measured with a goniometer?”</li>
+        </ul>
+      </div>
+      <div class="highlight-box" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+        <p style="font-size: 0.95rem; text-align: center; margin-bottom: 0.75rem;">
+          <strong>CMS 0057 + Da Vinci + AI</strong>
+        </p>
+        <p style="font-size: 0.85rem; text-align: center; color: var(--text-secondary);">
+          PA regulations and the Da Vinci spec can be met with AI — <strong>today</strong>. GenHealth combines FHIR interoperability with LLM reasoning to meet both the letter and spirit of CMS requirements.
+        </p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ======================== SLIDE 11: PLATFORM ARCHITECTURE ======================== -->
-<section class="slide" id="slide-11">
-  <span class="section-num">11</span>
+<!-- ======================== SLIDE 13: PLATFORM ARCHITECTURE ======================== -->
+<section class="slide" id="slide-13">
+  <span class="section-num">13</span>
   <div class="bg-glow bg-glow-teal" style="bottom: 0; left: 30%;"></div>
   <div class="slide-inner">
     <div class="reveal">
@@ -1570,9 +1703,82 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 12: ROI ======================== -->
-<section class="slide" id="slide-12">
-  <span class="section-num">12</span>
+
+<!-- ======================== SLIDE 14: PRODUCT FEATURES ======================== -->
+<section class="slide" id="slide-14">
+  <span class="section-num">14</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Platform Capabilities</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">The Complete UM/PA Platform</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        Every tool your utilization management team needs &#8212; from policy creation to adjudication to reporting &#8212; powered by AI and built for health plan scale.
+      </p>
+    </div>
+
+    <div class="grid-4">
+      <div class="card card-accent reveal reveal-delay-1" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#129302;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Policy Rules Agent</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">AI converts medical policy documents into structured, executable decision rules automatically.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-2" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#128218;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Policy &amp; Rules Library</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Centralized repository of medical policies, admin rules, and decision logic &#8212; searchable and version-controlled.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-3" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#127795;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Policy Tree &amp; Editor</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Visual editor for clinical decision trees. See the logic, edit the rules, deploy changes instantly.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-4" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#9889;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Adjudication Agent</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Automated review engine evaluates cases against policy rules and generates cited recommendations.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-5" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#128269;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Explainable Decisions</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Every recommendation includes a transparent decision tree with policy citations &#8212; fully auditable.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-6" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#128172;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Doc Chat</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Conversational AI for clinical documents. Ask questions, get answers with citations to source pages.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-1" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#128300;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Questions to CQL</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Natural language queries translated to Clinical Quality Language for structured decision support.</p>
+      </div>
+      <div class="card card-accent reveal reveal-delay-2" style="text-align: center;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#128202;</div>
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Standard Reporting</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);">Built-in PA metrics, turnaround tracking, and auto-compiled CMS public reporting data.</p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-3" style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        WCAG Accessible
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Keyboard Shortcuts
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Section 508 Ready
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 15: ROI ======================== -->
+<section class="slide" id="slide-15">
+  <span class="section-num">15</span>
   <div class="slide-inner">
     <div class="reveal">
       <div class="slide-label">Financial Impact</div>
@@ -1658,9 +1864,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 13: IMPLEMENTATION TIMELINE ======================== -->
-<section class="slide" id="slide-13">
-  <span class="section-num">13</span>
+<!-- ======================== SLIDE 16: IMPLEMENTATION TIMELINE ======================== -->
+<section class="slide" id="slide-16">
+  <span class="section-num">16</span>
   <div class="bg-glow bg-glow-teal" style="top: 40%; right: -200px;"></div>
   <div class="slide-inner">
     <div class="reveal">
@@ -1725,9 +1931,9 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 14: PRICING ======================== -->
-<section class="slide" id="slide-14">
-  <span class="section-num">14</span>
+<!-- ======================== SLIDE 17: PRICING ======================== -->
+<section class="slide" id="slide-17">
+  <span class="section-num">17</span>
   <div class="slide-inner">
     <div class="reveal">
       <div class="slide-label">Investment</div>
@@ -1792,8 +1998,8 @@ h1, h2, h3, h4 {
   </div>
 </section>
 
-<!-- ======================== SLIDE 15: CONTACT ======================== -->
-<section class="slide" id="slide-15">
+<!-- ======================== SLIDE 18: CONTACT ======================== -->
+<section class="slide" id="slide-18">
   <div class="bg-glow bg-glow-teal" style="top: 30%; left: 30%;"></div>
   <div class="slide-inner" style="text-align: center; max-width: 900px;">
     <div class="reveal">
@@ -1873,9 +2079,9 @@ h1, h2, h3, h4 {
 
   // ============ BUILD SLIDE NAV DOTS ============
   const slideTitles = [
-    'GenHealth.ai', 'Team', 'CMS 0057', 'Pain Points', 'Solution',
-    'Case Study', 'Workflow', 'Prior Auth', 'UM & Summaries', 'Compliance',
-    'Platform', 'ROI', 'Implementation', 'Pricing', 'Let\u2019s Talk'
+    'GenHealth.ai', 'Team', 'Medical Model', 'CMS 0057', 'Pain Points', 'Solution',
+    'Performance', 'Case Study', 'Workflow', 'Prior Auth', 'UM & Summaries', 'Compliance',
+    'Platform', 'Features', 'ROI', 'Implementation', 'Pricing', 'Let\u2019s Talk'
   ];
 
   slides.forEach((_, i) => {
