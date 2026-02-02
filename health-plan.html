@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenHealth.ai — AI-Native Utilization Management for Health Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #FAFAFC;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFFFF;
+  --accent: #0B6DEE;
+  --accent-dim: rgba(11,109,238,0.08);
+  --accent-glow: rgba(11,109,238,0.3);
+  --text-primary: #212529;
+  --text-secondary: #343A40;
+  --text-muted: #6C757D;
+  --border: #DEE2E6;
+  --gradient-accent: linear-gradient(135deg, #5A49E1 0%, #46D19A 100%);
+  --gradient-bg: linear-gradient(180deg, #FAFAFC 0%, #F8F9FA 50%, #FAFAFC 100%);
+  --accent-secondary: #46D19A;
+  --accent-purple: #5A49E1;
+  --accent-teal: #47D6C7;
+  --border-accent: rgba(11,109,238,0.3);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ClashDisplay replaced by Lexend */
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Titillium Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Progress Bar */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--gradient-accent);
+  z-index: 1000;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(11,109,238,0.2);
+}
+
+/* Navigation */
+#nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: 1.25rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(250,250,252,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.3s ease;
+}
+
+#nav.hidden { transform: translateY(-100%); }
+
+.nav-logo {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.nav-logo span { color: var(--accent); }
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-controls .slide-counter {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.75rem;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.nav-btn:hover {
+  background: #F0F1F3;
+  color: var(--text-primary);
+  border-color: rgba(0,0,0,0.12);
+}
+
+/* Slides */
+.slide {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 3rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+  font-family: 'Lexend', sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.slide-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slide-label::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.slide-title {
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #212529;
+  -webkit-text-fill-color: #212529;
+}
+
+.slide-subtitle {
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  color: var(--text-secondary);
+  max-width: 700px;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* Reveal Animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+
+/* Cards */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E9ECEF;
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.card:hover {
+  background: #FFFFFF;
+  border-color: #0B6DEE;
+  box-shadow: 0 4px 20px rgba(11,109,238,0.08);
+}
+
+.card-accent {
+  border-color: rgba(11,109,238,0.15);
+  background: linear-gradient(135deg, rgba(11,109,238,0.03) 0%, rgba(90,73,225,0.02) 100%);
+}
+
+.card-accent:hover {
+  border-color: rgba(11,109,238,0.4);
+  box-shadow: 0 4px 20px rgba(11,109,238,0.08);
+}
+
+/* Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+/* Stats */
+.stat-value {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #0B6DEE;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  font-family: 'Lexend', sans-serif;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Metric pills */
+.metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(11,109,238,0.08);
+  border: 1px solid rgba(11,109,238,0.2);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0B6DEE;
+}
+
+/* Lists */
+.feature-list {
+  list-style: none;
+}
+
+.feature-list li {
+  padding: 0.75rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.feature-list li:last-child { border-bottom: none; }
+
+.feature-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.1rem;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #0B6DEE 0%, rgba(11,109,238,0.1) 100%);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 2rem;
+  padding-left: 1.5rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2.35rem;
+  top: 0.35rem;
+  width: 12px;
+  height: 12px;
+  background: #FAFAFC;
+  border: 2px solid #0B6DEE;
+  border-radius: 50%;
+}
+
+.timeline-phase {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.timeline-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.timeline-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Pricing Table */
+.pricing-card {
+  background: #FFFFFF;
+  border: 1px solid #E9ECEF;
+  border-radius: 16px;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.pricing-card.featured {
+  border-color: rgba(11,109,238,0.4);
+  background: linear-gradient(180deg, rgba(11,109,238,0.06) 0%, rgba(11,109,238,0.02) 100%);
+}
+
+.pricing-card.featured::before {
+  content: 'MOST COMMON';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gradient-accent);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 1rem;
+  border-radius: 100px;
+}
+
+.pricing-tier {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.pricing-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-family: 'Lexend', sans-serif;
+}
+
+.pricing-period {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.pricing-features {
+  list-style: none;
+  text-align: left;
+}
+
+.pricing-features li {
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.pricing-features li::before {
+  content: '✓';
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Divider */
+.divider {
+  width: 60px;
+  height: 2px;
+  background: var(--gradient-accent);
+  margin: 2rem 0;
+}
+
+/* Flow diagram */
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.flow-step {
+  background: #FFFFFF;
+  border: 1px solid #E9ECEF;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  min-width: 160px;
+  flex: 1;
+  max-width: 220px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.flow-step-num {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.flow-step-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.flow-step-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.flow-arrow {
+  color: var(--accent);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Background decorations */
+.bg-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.bg-glow-teal { background: #0B6DEE; }
+.bg-glow-blue { background: #5A49E1; }
+
+/* Two column layouts */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.split-wide-left {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.split-wide-right {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #F8F9FA;
+  border: 1px solid #DEE2E6;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #343A40;
+  letter-spacing: 0.04em;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Contact card */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.contact-card {
+  background: #FFFFFF;
+  border: 1px solid #E9ECEF;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.contact-card:hover {
+  border-color: rgba(11,109,238,0.3);
+  background: #FFFFFF;
+  box-shadow: 0 4px 20px rgba(11,109,238,0.08);
+}
+
+.contact-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.contact-role {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.contact-email {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact-email:hover { text-decoration: underline; }
+
+/* CTA Button */
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2rem;
+  background: #0B6DEE;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  letter-spacing: -0.01em;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(11,109,238,0.25);
+}
+
+/* Team member */
+.team-member {
+  text-align: center;
+}
+
+.team-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(11,109,238,0.12) 0%, rgba(90,73,225,0.1) 100%);
+  border: 2px solid rgba(11,109,238,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0B6DEE;
+}
+
+.team-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.team-role {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.team-bio {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Compliance badge */
+.compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.compliance-badge svg { color: var(--accent); }
+
+/* Architecture diagram */
+.arch-layer {
+  background: #FFFFFF;
+  border: 1px solid #E9ECEF;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.arch-layer-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  min-width: 100px;
+}
+
+.arch-layer-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.arch-item {
+  padding: 0.35rem 0.85rem;
+  background: #F8F9FA;
+  border: 1px solid #DEE2E6;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* Section number */
+.section-num {
+  font-size: 5rem;
+  font-weight: 800;
+  color: rgba(11,109,238,0.06);
+  position: absolute;
+  top: 5rem;
+  right: 3rem;
+  font-family: 'Lexend', sans-serif;
+  line-height: 1;
+}
+
+/* Highlight box */
+.highlight-box {
+  background: linear-gradient(135deg, rgba(11,109,238,0.05) 0%, rgba(90,73,225,0.03) 100%);
+  border: 1px solid rgba(11,109,238,0.15);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+}
+
+.highlight-box p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.highlight-box strong {
+  color: var(--accent);
+}
+
+/* ROI table */
+.roi-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.5rem;
+}
+
+.roi-table th {
+  text-align: left;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.roi-table td {
+  padding: 0.85rem 1.25rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.roi-table tr:last-child td { border-bottom: none; }
+
+.roi-table .accent { color: var(--accent); font-weight: 600; }
+
+/* Keyboard hint */
+.keyboard-hint {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.35rem;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+  z-index: 998;
+}
+
+.keyboard-hint:hover { opacity: 0.6; }
+
+.key {
+  padding: 0.3rem 0.55rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .split, .split-wide-left, .split-wide-right { grid-template-columns: 1fr; gap: 2rem; }
+  .contact-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .slide { padding: 5rem 1.5rem 3rem; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .flow-row { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+  #nav { padding: 1rem 1.25rem; }
+  .section-num { display: none; }
+  .stat-value { font-size: 2.2rem; }
+  .arch-layer { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .slide { padding: 4.5rem 1rem 2rem; }
+  .keyboard-hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar" style="width: 0%"></div>
+
+<!-- Navigation -->
+<nav id="nav">
+  <div class="nav-logo">Gen<span>Health</span>.ai</div>
+  <div class="nav-controls">
+    <span class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">15</span></span>
+    <button class="nav-btn" onclick="prevSlide()" aria-label="Previous slide">↑</button>
+    <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide">↓</button>
+  </div>
+</nav>
+
+<!-- Keyboard Hint -->
+<div class="keyboard-hint">
+  <span class="key">↑</span>
+  <span class="key">↓</span>
+  <span class="key">Space</span>
+</div>
+
+<!-- ======================== SLIDE 1: TITLE ======================== -->
+<section class="slide" id="slide-1">
+  <div class="bg-glow bg-glow-teal" style="top: -100px; right: -150px;"></div>
+  <div class="bg-glow bg-glow-blue" style="bottom: -200px; left: -100px;"></div>
+  <div class="slide-inner" style="text-align: center; max-width: 900px;">
+    <div class="reveal">
+      <div style="margin-bottom: 2.5rem;">
+        <span class="tag" style="font-size: 0.8rem; padding: 0.4rem 1.2rem;">HEALTH PLAN SOLUTIONS</span>
+      </div>
+    </div>
+    <h1 class="slide-title reveal reveal-delay-1" style="font-size: clamp(2.5rem, 5.5vw, 4.2rem); max-width: none;">
+      AI-Native Utilization Management<br>for Health Plans
+    </h1>
+    <p class="slide-subtitle reveal reveal-delay-2" style="max-width: 650px; margin: 0 auto 2.5rem; font-size: 1.15rem;">
+      Reduce UM workload by up to 60%. Achieve CMS 0057 compliance. Deliver faster, more accurate authorization decisions.
+    </p>
+    <div class="reveal reveal-delay-3" style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 3rem;">
+      <div class="metric-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+        60% Workload Reduction
+      </div>
+      <div class="metric-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        90%+ Accuracy
+      </div>
+      <div class="metric-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        4-Month Implementation
+      </div>
+    </div>
+    <div class="reveal reveal-delay-4">
+      <a href="#slide-5" class="cta-btn">
+        See the Platform →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 2: TEAM ======================== -->
+<section class="slide" id="slide-2">
+  <span class="section-num">02</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Leadership</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Built by the team behind<br>1upHealth & 50M+ patient APIs</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        Deep expertise in healthcare interoperability, clinical AI, and enterprise health plan infrastructure — from the same team that built the industry's leading FHIR platform.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card reveal reveal-delay-1">
+        <div class="team-member">
+          <div class="team-avatar">RS</div>
+          <div class="team-name">Ricky Sahu</div>
+          <div class="team-role">CEO & Co-Founder</div>
+          <div class="team-bio">Founder of 1upHealth (50M+ patient FHIR APIs). First hire at CareJourney. Ex-Google. Deep payer & interoperability expertise.</div>
+        </div>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <div class="team-member">
+          <div class="team-avatar">ES</div>
+          <div class="team-name">Ethan Siegel</div>
+          <div class="team-role">Chief Product Officer</div>
+          <div class="team-bio">Product & Data Engineering at 1upHealth. Clinical trial matching at Dana-Farber Cancer Institute. Deep clinical workflow expertise.</div>
+        </div>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <div class="team-member">
+          <div class="team-avatar">EM</div>
+          <div class="team-name">Eric Marriott</div>
+          <div class="team-role">Chief Technology Officer</div>
+          <div class="team-bio">AI & Statistics. Data Engineering at 1upHealth. Research at Dana-Farber Cancer Institute & iSpecimen. ML/NLP infrastructure at scale.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-4" style="margin-top: 2.5rem;">
+      <div class="highlight-box" style="text-align: center;">
+        <p><strong>1upHealth DNA:</strong> Our team built the FHIR infrastructure now used by major health plans and CMS. We understand payer data, compliance, and clinical workflows at the deepest level.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 3: REGULATORY ======================== -->
+<section class="slide" id="slide-3">
+  <span class="section-num">03</span>
+  <div class="bg-glow bg-glow-teal" style="top: 20%; left: -200px;"></div>
+  <div class="slide-inner">
+    <div class="split">
+      <div>
+        <div class="reveal">
+          <div class="slide-label">Regulatory Landscape</div>
+          <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">CMS 0057 Changes Everything for Health Plans</h2>
+          <p class="slide-subtitle" style="margin-bottom: 2rem;">
+            CMS finalized sweeping prior authorization reforms effective 2026. Non-compliance risks penalties, audit exposure, and accreditation loss.
+          </p>
+        </div>
+        <div class="highlight-box reveal reveal-delay-1">
+          <p style="font-size: 0.85rem; margin-bottom: 0.75rem;"><strong>Effective January 2026</strong> — Medicare Advantage, Medicaid managed care, CHIP, and ACA marketplace plans must comply.</p>
+          <p style="font-size: 0.85rem;"><strong>42 CFR § 422.566(d):</strong> All adverse authorization determinations require licensed physician review and sign-off.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="card reveal reveal-delay-1" style="margin-bottom: 1rem;">
+          <h4 style="color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;">⚡ FHIR API Requirements</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Standardized electronic PA interfaces using HL7 FHIR APIs. Plans must support Patient Access, Provider Access, and Payer-to-Payer APIs.</p>
+        </div>
+        <div class="card reveal reveal-delay-2" style="margin-bottom: 1rem;">
+          <h4 style="color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;">⏱ Response Time Mandates</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Shortened decision timelines for standard and expedited requests. Urgent PA decisions within 72 hours; standard within 7 calendar days.</p>
+        </div>
+        <div class="card reveal reveal-delay-3" style="margin-bottom: 1rem;">
+          <h4 style="color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;">📋 Documentation & Transparency</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Specific denial reasons with clinical justifications required. Public reporting of PA metrics including approval rates and processing times.</p>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <h4 style="color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;">🏛 State-Level Mandates</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">California SB 1120 requires medical necessity decisions by licensed providers. NCQA standards demand fairness, efficiency, and evidence-based criteria.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 4: CHALLENGES ======================== -->
+<section class="slide" id="slide-4">
+  <span class="section-num">04</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">The Problem</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Health Plan UM Is Breaking Under Pressure</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        Rising case volumes, tighter regulations, and clinical staff shortages create an unsustainable equation.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card reveal reveal-delay-1">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">📑</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Manual Document Review</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">RNs spend hours reviewing hundreds of pages of clinical records per case. Fax-based intake creates bottlenecks before review even begins.</p>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">⏰</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Response Time Pressure</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">CMS 0057 mandates faster turnarounds while volume grows. Current processes can't scale without proportional staff increases.</p>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">⚖️</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Compliance Exposure</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">Every denial must include clinical justification and physician sign-off. Inadequate documentation invites audit risk and regulatory penalties.</p>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">👩‍⚕️</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Clinical Staff Shortage</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">Qualified UM nurses and physician reviewers are scarce and expensive. Scaling with headcount alone is neither feasible nor sustainable.</p>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">🔗</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Policy Fragmentation</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">Medical policies live in PDFs, portals, and tribal knowledge. Inconsistent application leads to variable decisions and appeal vulnerabilities.</p>
+      </div>
+      <div class="card reveal reveal-delay-6">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">📊</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Audit & Reporting Gaps</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">CMS now requires public reporting of PA metrics. Many plans lack the infrastructure to track, measure, and report authorization data systematically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 5: SOLUTION OVERVIEW ======================== -->
+<section class="slide" id="slide-5">
+  <span class="section-num">05</span>
+  <div class="bg-glow bg-glow-teal" style="bottom: -100px; right: -100px;"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Our Solution</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">GenHealth: AI That Augments<br>Your Clinical Team</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        Purpose-built for health plan utilization management. AI handles the intake, summarization, and policy matching — your clinicians make the final call.
+      </p>
+    </div>
+
+    <div class="highlight-box reveal reveal-delay-1" style="margin-bottom: 2.5rem; text-align: center;">
+      <p style="font-size: 1rem; font-weight: 500;"><strong>Core Principle:</strong> AI never autonomously denies care. Every recommendation flows through licensed clinical reviewers.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card card-accent reveal reveal-delay-2">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem;">Intelligent Intake</h4>
+        <ul class="feature-list">
+          <li>OCR + LLM processing of clinical documents</li>
+          <li>Automated data extraction from faxes, portals, EHRs</li>
+          <li>Structured case assembly in minutes, not hours</li>
+        </ul>
+      </div>
+      <div class="card card-accent reveal reveal-delay-3">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem;">AI Decision Support</h4>
+        <ul class="feature-list">
+          <li>Policy-matched recommendations with citations</li>
+          <li>Escalation routing for complex cases</li>
+          <li>Error detection and consistency checks</li>
+        </ul>
+      </div>
+      <div class="card card-accent reveal reveal-delay-4">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem;">Compliance & Audit</h4>
+        <ul class="feature-list">
+          <li>Full audit trail with citations for every decision</li>
+          <li>CMS 0057 response time tracking</li>
+          <li>HIPAA compliant, SOC 2 certified</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tag-row reveal reveal-delay-5" style="margin-top: 2rem; justify-content: center; display: flex;">
+      <span class="tag">HIPAA Compliant</span>
+      <span class="tag">SOC 2</span>
+      <span class="tag">FHIR Ready</span>
+      <span class="tag">No Workflow Disruption</span>
+      <span class="tag">Existing Portal Integration</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 6: CASE STUDY HEADLINE ======================== -->
+<section class="slide" id="slide-6">
+  <span class="section-num">06</span>
+  <div class="bg-glow bg-glow-teal" style="top: 30%; left: -150px;"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Proven Results</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Guidehealth Reduced UM Workload<br>by up to 60% with GenHealth AI</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        A managed services organization processing hundreds of thousands of members deployed GenHealth's AI platform in 4 months — and saw immediate, measurable results.
+      </p>
+    </div>
+
+    <div class="grid-4 reveal reveal-delay-1">
+      <div class="card card-accent" style="text-align: center;">
+        <div class="stat-value">60%</div>
+        <div class="stat-label">UM Workload Reduction</div>
+      </div>
+      <div class="card card-accent" style="text-align: center;">
+        <div class="stat-value">90%+</div>
+        <div class="stat-label">Decision Accuracy vs. Human Review</div>
+      </div>
+      <div class="card card-accent" style="text-align: center;">
+        <div class="stat-value">7X+</div>
+        <div class="stat-label">Projected ROI</div>
+      </div>
+      <div class="card card-accent" style="text-align: center;">
+        <div class="stat-value">4 Mo</div>
+        <div class="stat-label">Full Implementation</div>
+      </div>
+    </div>
+
+    <div class="grid-3 reveal reveal-delay-2" style="margin-top: 1.5rem;">
+      <div class="card" style="text-align: center;">
+        <div class="stat-value" style="font-size: 1.8rem;">700–1,700</div>
+        <div class="stat-label">Cases processed per week</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div class="stat-value" style="font-size: 1.8rem;">~1 hr</div>
+        <div class="stat-label">Reduction in SNF review time per case</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div class="stat-value" style="font-size: 1.8rem;">&lt;10 min</div>
+        <div class="stat-label">Medical policy evaluations</div>
+      </div>
+    </div>
+
+    <div class="highlight-box reveal reveal-delay-3" style="margin-top: 2rem; text-align: center;">
+      <p><strong>Projected Savings:</strong> $245K–$385K per year per IPA, scaling to approximately <strong>$1.2M across all IPAs</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 7: CASE STUDY DEEP DIVE ======================== -->
+<section class="slide" id="slide-7">
+  <span class="section-num">07</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Case Study Deep Dive</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.2vw, 2.4rem);">How It Works: The Guidehealth Workflow</h2>
+    </div>
+
+    <div class="split-wide-left" style="margin-top: 2rem;">
+      <div>
+        <div class="reveal reveal-delay-1" style="margin-bottom: 2rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem;">End-to-End UM/PA Workflow</h4>
+          <div class="flow-row" style="flex-direction: column; align-items: stretch;">
+            <div class="flow-step" style="max-width: none; display: flex; align-items: center; gap: 1rem;">
+              <span class="flow-step-num" style="min-width: 60px;">Step 1</span>
+              <div style="text-align: left;">
+                <div class="flow-step-title">Clinical Document Intake</div>
+                <div class="flow-step-desc">OCR and LLMs process faxes, portal submissions, and EHR records into structured data</div>
+              </div>
+            </div>
+            <div style="text-align: center; color: var(--accent); font-size: 0.8rem;">↓</div>
+            <div class="flow-step" style="max-width: none; display: flex; align-items: center; gap: 1rem;">
+              <span class="flow-step-num" style="min-width: 60px;">Step 2</span>
+              <div style="text-align: left;">
+                <div class="flow-step-title">AI Summarization & Analysis</div>
+                <div class="flow-step-desc">Hundreds of pages distilled to clinical summaries with relevant findings highlighted</div>
+              </div>
+            </div>
+            <div style="text-align: center; color: var(--accent); font-size: 0.8rem;">↓</div>
+            <div class="flow-step" style="max-width: none; display: flex; align-items: center; gap: 1rem;">
+              <span class="flow-step-num" style="min-width: 60px;">Step 3</span>
+              <div style="text-align: left;">
+                <div class="flow-step-title">Policy Matching & Recommendation</div>
+                <div class="flow-step-desc">Case details matched against structured medical policies with cited decision rationale</div>
+              </div>
+            </div>
+            <div style="text-align: center; color: var(--accent); font-size: 0.8rem;">↓</div>
+            <div class="flow-step" style="max-width: none; display: flex; align-items: center; gap: 1rem;">
+              <span class="flow-step-num" style="min-width: 60px;">Step 4</span>
+              <div style="text-align: left;">
+                <div class="flow-step-title">Clinical Review & Decision</div>
+                <div class="flow-step-desc">Licensed reviewers validate AI recommendations — approve, modify, or escalate</div>
+              </div>
+            </div>
+            <div style="text-align: center; color: var(--accent); font-size: 0.8rem;">↓</div>
+            <div class="flow-step" style="max-width: none; display: flex; align-items: center; gap: 1rem;">
+              <span class="flow-step-num" style="min-width: 60px;">Step 5</span>
+              <div style="text-align: left;">
+                <div class="flow-step-title">Audit Trail & Reporting</div>
+                <div class="flow-step-desc">Every decision documented with full citations, timestamps, and reviewer attribution</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card card-accent reveal reveal-delay-2" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem;">Implementation Timeline</h4>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-phase">Month 1</div>
+              <div class="timeline-title">Policy Ingestion</div>
+              <div class="timeline-desc">Medical policies structured into AI-ready decision trees</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-phase">Month 2</div>
+              <div class="timeline-title">Integration & Training</div>
+              <div class="timeline-desc">Portal integration, staff training, parallel processing begins</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-phase">Month 3</div>
+              <div class="timeline-title">Validation</div>
+              <div class="timeline-desc">AI vs. human decision comparison, accuracy calibration</div>
+            </div>
+            <div class="timeline-item" style="padding-bottom: 0;">
+              <div class="timeline-phase">Month 4</div>
+              <div class="timeline-title">Full Production</div>
+              <div class="timeline-desc">Live deployment with ongoing monitoring and optimization</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal reveal-delay-3">
+          <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem;">Safety Guardrail</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+            AI <strong style="color: var(--text-primary);">never autonomously denies care</strong>. All recommendations are presented to licensed clinical reviewers who make final determinations — fully compliant with 42 CFR § 422.566(d) and state-level regulations.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 8: USE CASE - PA ======================== -->
+<section class="slide" id="slide-8">
+  <span class="section-num">08</span>
+  <div class="slide-inner">
+    <div class="split">
+      <div>
+        <div class="reveal">
+          <div class="slide-label">Use Case</div>
+          <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.2vw, 2.4rem);">Prior Authorization Automation</h2>
+          <p class="slide-subtitle" style="margin-bottom: 2rem;">
+            Process PA requests against your medical policies automatically. Reduce turnaround from days to minutes while maintaining clinical rigor.
+          </p>
+        </div>
+
+        <ul class="feature-list reveal reveal-delay-1">
+          <li>Automated extraction of clinical data from PA submissions</li>
+          <li>Real-time matching against structured medical policies</li>
+          <li>Auto-approval routing for clearly qualifying requests</li>
+          <li>Intelligent escalation for complex or borderline cases</li>
+          <li>Denial documentation pre-populated with clinical justifications</li>
+          <li>Full FHIR API support for CMS 0057 electronic PA requirements</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-2">
+        <div class="card card-accent" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">Before GenHealth</span>
+          </div>
+          <div style="font-size: 2rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.25rem;">45–90 min</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Average PA review time per case</div>
+        </div>
+        <div class="card card-accent">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.75rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">With GenHealth</span>
+          </div>
+          <div style="font-size: 2rem; font-weight: 700; color: var(--accent); margin-bottom: 0.25rem;">&lt;10 min</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">Policy evaluation with AI-generated clinical summary</div>
+        </div>
+        <div class="highlight-box" style="margin-top: 1.25rem;">
+          <p style="font-size: 0.85rem; text-align: center;">
+            <strong>Result:</strong> Your clinical staff focuses on complex cases that require human judgment — not routine data extraction.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 9: USE CASE - UM & SUMMARIES ======================== -->
+<section class="slide" id="slide-9">
+  <span class="section-num">09</span>
+  <div class="bg-glow bg-glow-blue" style="top: 10%; right: -200px;"></div>
+  <div class="slide-inner">
+    <div class="split">
+      <div>
+        <div class="reveal">
+          <div class="slide-label">Use Case</div>
+          <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.2vw, 2.4rem);">UM Decision Support &<br>Clinical Summaries</h2>
+          <p class="slide-subtitle" style="margin-bottom: 2rem;">
+            Transform how your nurses review cases. AI distills hundreds of pages into actionable clinical summaries — with decision recommendations backed by policy citations.
+          </p>
+        </div>
+
+        <div class="card card-accent reveal reveal-delay-1" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.85rem; color: var(--accent); font-weight: 600; margin-bottom: 0.75rem;">Clinical Document Summarization</h4>
+          <ul class="feature-list">
+            <li>OCR + LLM processing of all document formats</li>
+            <li>Key findings, diagnoses, and treatment history extracted</li>
+            <li>Relevant clinical data highlighted for reviewer attention</li>
+            <li>Reduces RN case prep from 45+ minutes to under 10</li>
+          </ul>
+        </div>
+
+        <div class="card card-accent reveal reveal-delay-2">
+          <h4 style="font-size: 0.85rem; color: var(--accent); font-weight: 600; margin-bottom: 0.75rem;">AI Decision Recommendations</h4>
+          <ul class="feature-list">
+            <li>Matches case data to applicable medical policies</li>
+            <li>Generates approve/deny/escalate recommendations</li>
+            <li>Every recommendation includes policy citations</li>
+            <li>Error detection catches data inconsistencies</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="card reveal reveal-delay-3" style="background: linear-gradient(135deg, rgba(11,109,238,0.05) 0%, transparent 100%); border-color: rgba(11,109,238,0.2); padding: 2rem;">
+          <h4 style="font-size: 0.75rem; font-weight: 600; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.25rem;">Sample AI Output</h4>
+          <div style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; line-height: 1.8; color: var(--text-secondary);">
+            <div style="color: var(--text-muted); margin-bottom: 0.5rem;">// Case Summary — SNF Review</div>
+            <div><span style="color: var(--accent);">Patient:</span> 78F, Medicare Advantage</div>
+            <div><span style="color: var(--accent);">Request:</span> SNF stay extension (Day 14→21)</div>
+            <div><span style="color: var(--accent);">Dx:</span> R hip fracture s/p ORIF, PT ongoing</div>
+            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+              <div style="color: var(--text-muted); margin-bottom: 0.5rem;">// Policy Match</div>
+              <div><span style="color: var(--accent);">Policy:</span> SNF-2024-003 § 4.2</div>
+              <div><span style="color: var(--accent);">Criteria Met:</span> 3 of 4 required</div>
+              <div><span style="color: var(--accent);">Missing:</span> Updated PT progress notes</div>
+            </div>
+            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+              <div style="color: var(--text-muted); margin-bottom: 0.5rem;">// Recommendation</div>
+              <div><span style="color: #f59e0b;">⚠ PEND</span> — Request additional PT documentation</div>
+              <div style="color: var(--text-muted); font-size: 0.72rem; margin-top: 0.35rem;">Confidence: 94% | Review time: 3.2s</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2 reveal reveal-delay-4" style="margin-top: 1.25rem;">
+          <div class="card" style="text-align: center; padding: 1.25rem;">
+            <div class="stat-value" style="font-size: 1.6rem;">~1 hr</div>
+            <div class="stat-label">Saved per SNF review</div>
+          </div>
+          <div class="card" style="text-align: center; padding: 1.25rem;">
+            <div class="stat-value" style="font-size: 1.6rem;">90%+</div>
+            <div class="stat-label">Recommendation accuracy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 10: USE CASE - CMS 0057 ======================== -->
+<section class="slide" id="slide-10">
+  <span class="section-num">10</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Use Case</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">CMS 0057 Compliance — Built In</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        GenHealth was built with CMS 0057 requirements at the core — not bolted on as an afterthought.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-accent reveal reveal-delay-1">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">FHIR API Readiness</h4>
+        <ul class="feature-list">
+          <li>Patient Access API — members can view PA status and history</li>
+          <li>Provider Access API — real-time authorization submission and tracking</li>
+          <li>Payer-to-Payer API — interoperable data exchange between plans</li>
+          <li>Built on HL7 FHIR R4 standards from day one</li>
+        </ul>
+        <div class="tag-row" style="margin-top: 1rem;">
+          <span class="tag">FHIR R4</span>
+          <span class="tag">HL7</span>
+          <span class="tag">Da Vinci IG</span>
+        </div>
+      </div>
+
+      <div class="card card-accent reveal reveal-delay-2">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">Response Time Compliance</h4>
+        <ul class="feature-list">
+          <li>AI pre-processing enables same-day turnaround for routine cases</li>
+          <li>Automated SLA tracking and escalation alerts</li>
+          <li>Dashboard monitoring of response time metrics</li>
+          <li>Projected compliance rate: 98%+ with AI-assisted workflow</li>
+        </ul>
+        <div class="tag-row" style="margin-top: 1rem;">
+          <span class="tag">72hr Urgent</span>
+          <span class="tag">7-Day Standard</span>
+        </div>
+      </div>
+
+      <div class="card card-accent reveal reveal-delay-3">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">Denial Documentation</h4>
+        <ul class="feature-list">
+          <li>Auto-generated clinical justifications for every adverse determination</li>
+          <li>Specific denial reasons mapped to medical policy criteria</li>
+          <li>Physician reviewer attribution and sign-off tracking</li>
+          <li>Member-facing explanation letters generated automatically</li>
+        </ul>
+      </div>
+
+      <div class="card card-accent reveal reveal-delay-4">
+        <h4 style="color: var(--accent); font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">Public Reporting</h4>
+        <ul class="feature-list">
+          <li>Real-time PA metrics dashboard — approvals, denials, turnaround times</li>
+          <li>CMS-required public reporting data auto-compiled</li>
+          <li>Appeals rate tracking and trending</li>
+          <li>NCQA accreditation support documentation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 11: PLATFORM ARCHITECTURE ======================== -->
+<section class="slide" id="slide-11">
+  <span class="section-num">11</span>
+  <div class="bg-glow bg-glow-teal" style="bottom: 0; left: 30%;"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Architecture</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Platform Architecture &<br>Integrations</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        GenHealth integrates with your existing infrastructure — no rip-and-replace required. Our platform layers on top of your current portals and workflows.
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-1">
+      <div class="arch-layer">
+        <div class="arch-layer-label">Data Intake</div>
+        <div class="arch-layer-items">
+          <div class="arch-item">Fax / eFax</div>
+          <div class="arch-item">Provider Portals</div>
+          <div class="arch-item">EHR / EMR (HL7, FHIR)</div>
+          <div class="arch-item">Direct Upload</div>
+          <div class="arch-item">Payer APIs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-2">
+      <div class="arch-layer" style="border-color: rgba(11,109,238,0.2); background: linear-gradient(90deg, rgba(11,109,238,0.04), transparent);">
+        <div class="arch-layer-label">AI Engine</div>
+        <div class="arch-layer-items">
+          <div class="arch-item">OCR Processing</div>
+          <div class="arch-item">LLM Summarization</div>
+          <div class="arch-item">Policy Decision Trees</div>
+          <div class="arch-item">NLP Extraction</div>
+          <div class="arch-item">Error Detection</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-3">
+      <div class="arch-layer" style="border-color: rgba(11,109,238,0.25); background: linear-gradient(90deg, rgba(11,109,238,0.06), transparent);">
+        <div class="arch-layer-label">Workflow</div>
+        <div class="arch-layer-items">
+          <div class="arch-item">Case Queue Management</div>
+          <div class="arch-item">Escalation Routing</div>
+          <div class="arch-item">Decision Recommendations</div>
+          <div class="arch-item">Reviewer Dashboard</div>
+          <div class="arch-item">SLA Tracking</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-4">
+      <div class="arch-layer">
+        <div class="arch-layer-label">Compliance</div>
+        <div class="arch-layer-items">
+          <div class="arch-item">Audit Trail</div>
+          <div class="arch-item">FHIR APIs (R4)</div>
+          <div class="arch-item">CMS Reporting</div>
+          <div class="arch-item">NCQA Documentation</div>
+          <div class="arch-item">Denial Letters</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-5">
+      <div class="arch-layer">
+        <div class="arch-layer-label">Integration</div>
+        <div class="arch-layer-items">
+          <div class="arch-item">Existing UM Platforms</div>
+          <div class="arch-item">Claims Systems</div>
+          <div class="arch-item">Member Portals</div>
+          <div class="arch-item">Provider Directories</div>
+          <div class="arch-item">Analytics/BI</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-6" style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        HIPAA Compliant
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        SOC 2 Type II
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        FHIR R4 Native
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Cloud-Native
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 12: ROI ======================== -->
+<section class="slide" id="slide-12">
+  <span class="section-num">12</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Financial Impact</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">ROI & Efficiency Projections</h2>
+      <p class="slide-subtitle" style="margin-bottom: 2.5rem;">
+        Based on Guidehealth deployment data and scaled for health plan membership sizes.
+      </p>
+    </div>
+
+    <div class="split">
+      <div>
+        <div class="card reveal reveal-delay-1" style="margin-bottom: 1.25rem;">
+          <table class="roi-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Before</th>
+                <th>With GenHealth</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PA Review Time</td>
+                <td>45–90 min</td>
+                <td class="accent">&lt;10 min</td>
+              </tr>
+              <tr>
+                <td>SNF Review Time</td>
+                <td>60+ min</td>
+                <td class="accent">~15 min</td>
+              </tr>
+              <tr>
+                <td>UM Staff Workload</td>
+                <td>100%</td>
+                <td class="accent">40% (60% reduction)</td>
+              </tr>
+              <tr>
+                <td>Decision Consistency</td>
+                <td>Variable</td>
+                <td class="accent">90%+ accuracy</td>
+              </tr>
+              <tr>
+                <td>Policy Evaluation</td>
+                <td>30+ min</td>
+                <td class="accent">&lt;10 min</td>
+              </tr>
+              <tr>
+                <td>Audit Readiness</td>
+                <td>Manual compilation</td>
+                <td class="accent">Continuous / automatic</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="card card-accent reveal reveal-delay-2" style="margin-bottom: 1.25rem;">
+          <h4 style="color: var(--accent); font-size: 0.85rem; font-weight: 600; margin-bottom: 1.25rem;">Projected Annual Savings</h4>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;">Per IPA / Division</div>
+              <div style="font-size: 1.8rem; font-weight: 700; color: var(--accent);">$245K–$385K</div>
+            </div>
+            <div style="border-top: 1px solid var(--border); padding-top: 1rem;">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;">Enterprise-Wide (Multi-IPA)</div>
+              <div style="font-size: 1.8rem; font-weight: 700; color: var(--accent);">~$1.2M+</div>
+            </div>
+            <div style="border-top: 1px solid var(--border); padding-top: 1rem;">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;">Projected ROI</div>
+              <div style="font-size: 1.8rem; font-weight: 700; color: var(--accent);">7X+</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-box reveal reveal-delay-3">
+          <p style="font-size: 0.85rem; text-align: center;">
+            <strong>Beyond cost savings:</strong> Faster authorization decisions improve provider satisfaction, reduce member complaints, and lower appeals volume.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 13: IMPLEMENTATION TIMELINE ======================== -->
+<section class="slide" id="slide-13">
+  <span class="section-num">13</span>
+  <div class="bg-glow bg-glow-teal" style="top: 40%; right: -200px;"></div>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Getting Started</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Implementation Timeline</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        Live in production within 4 months. No workflow disruption during transition — we layer on top of your existing systems.
+      </p>
+    </div>
+
+    <div class="grid-4">
+      <div class="card card-accent reveal reveal-delay-1" style="text-align: center; position: relative;">
+        <div style="font-size: 0.65rem; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem;">Month 1</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Discovery &<br>Policy Ingestion</h4>
+        <ul style="list-style: none; text-align: left;">
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Workflow assessment</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Medical policy digitization</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Decision tree creation</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Integration scoping</li>
+        </ul>
+      </div>
+
+      <div class="card card-accent reveal reveal-delay-2" style="text-align: center;">
+        <div style="font-size: 0.65rem; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem;">Month 2</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Integration &<br>Configuration</h4>
+        <ul style="list-style: none; text-align: left;">
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Portal integration</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• FHIR API setup</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Staff training begins</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Test environment live</li>
+        </ul>
+      </div>
+
+      <div class="card card-accent reveal reveal-delay-3" style="text-align: center;">
+        <div style="font-size: 0.65rem; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem;">Month 3</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Parallel Processing<br>& Validation</h4>
+        <ul style="list-style: none; text-align: left;">
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• AI runs alongside human reviewers</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Accuracy benchmarking</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Model calibration</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Workflow optimization</li>
+        </ul>
+      </div>
+
+      <div class="card card-accent reveal reveal-delay-4" style="text-align: center;">
+        <div style="font-size: 0.65rem; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem;">Month 4</div>
+        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Production<br>Deployment</h4>
+        <ul style="list-style: none; text-align: left;">
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Full production go-live</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Ongoing monitoring</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Continuous optimization</li>
+          <li style="font-size: 0.78rem; color: var(--text-secondary); padding: 0.25rem 0;">• Performance reporting</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-box reveal reveal-delay-5" style="margin-top: 2.5rem; text-align: center;">
+      <p style="font-size: 0.95rem;">
+        <strong>CMS 0057 deadline: January 2026.</strong> Starting now ensures your plan is compliant before the mandate takes effect — with months to spare for optimization.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 14: PRICING ======================== -->
+<section class="slide" id="slide-14">
+  <span class="section-num">14</span>
+  <div class="slide-inner">
+    <div class="reveal">
+      <div class="slide-label">Investment</div>
+      <h2 class="slide-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem);">Enterprise Pricing</h2>
+      <p class="slide-subtitle" style="margin-bottom: 3rem;">
+        Structured around membership size, case volume, and workflow scope. Every engagement starts with a detailed ROI analysis.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="pricing-card reveal reveal-delay-1">
+        <div class="pricing-tier">Regional Plans</div>
+        <div class="pricing-amount">$500K–$1M</div>
+        <div class="pricing-period">annually</div>
+        <ul class="pricing-features">
+          <li>Up to 250K members</li>
+          <li>Core UM/PA automation</li>
+          <li>Policy ingestion & decision trees</li>
+          <li>Clinical document summarization</li>
+          <li>Audit trail & compliance reporting</li>
+          <li>Standard integrations</li>
+        </ul>
+      </div>
+
+      <div class="pricing-card featured reveal reveal-delay-2">
+        <div class="pricing-tier">Mid-Market Plans</div>
+        <div class="pricing-amount">$1M–$2M</div>
+        <div class="pricing-period">annually</div>
+        <ul class="pricing-features">
+          <li>250K–1M members</li>
+          <li>Full UM/PA platform</li>
+          <li>CMS 0057 compliance suite</li>
+          <li>FHIR API implementation</li>
+          <li>Advanced analytics & reporting</li>
+          <li>Custom portal integrations</li>
+          <li>Dedicated implementation team</li>
+        </ul>
+      </div>
+
+      <div class="pricing-card reveal reveal-delay-3">
+        <div class="pricing-tier">Large / National Plans</div>
+        <div class="pricing-amount">$2M+</div>
+        <div class="pricing-period">annually</div>
+        <ul class="pricing-features">
+          <li>1M+ members (BCBS scale)</li>
+          <li>Enterprise-wide deployment</li>
+          <li>Multi-state compliance support</li>
+          <li>Custom AI model training</li>
+          <li>Priority SLA & 24/7 support</li>
+          <li>On-premise deployment options</li>
+          <li>Strategic advisory partnership</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-4" style="margin-top: 2.5rem; text-align: center;">
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        All pricing is custom-fit based on membership size, case volume, and desired workflow scope.<br>
+        ROI analysis provided during initial engagement — most plans see 5–7X return within 12 months.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== SLIDE 15: CONTACT ======================== -->
+<section class="slide" id="slide-15">
+  <div class="bg-glow bg-glow-teal" style="top: 30%; left: 30%;"></div>
+  <div class="slide-inner" style="text-align: center; max-width: 900px;">
+    <div class="reveal">
+      <div class="slide-label" style="justify-content: center;">Next Steps</div>
+      <h2 class="slide-title" style="font-size: clamp(2rem, 4vw, 3.2rem);">Ready to Transform Your<br>Utilization Management?</h2>
+      <p class="slide-subtitle" style="margin: 0 auto 3rem; max-width: 600px; text-align: center;">
+        Let's discuss your plan's specific challenges and build a custom ROI analysis. CMS 0057 compliance deadline is approaching — start now.
+      </p>
+    </div>
+
+    <div class="contact-grid reveal reveal-delay-1">
+      <div class="contact-card">
+        <div class="team-avatar" style="width: 56px; height: 56px; font-size: 1.1rem;">RS</div>
+        <div class="contact-name">Ricky Sahu</div>
+        <div class="contact-role">CEO & Co-Founder</div>
+        <a href="mailto:ricky@genhealth.ai" class="contact-email">ricky@genhealth.ai</a>
+      </div>
+      <div class="contact-card">
+        <div class="team-avatar" style="width: 56px; height: 56px; font-size: 1.1rem;">ES</div>
+        <div class="contact-name">Ethan Siegel</div>
+        <div class="contact-role">Chief Product Officer</div>
+        <a href="mailto:ethan@genhealth.ai" class="contact-email">ethan@genhealth.ai</a>
+      </div>
+      <div class="contact-card">
+        <div class="team-avatar" style="width: 56px; height: 56px; font-size: 1.1rem;">MM</div>
+        <div class="contact-name">Mike Maseda</div>
+        <div class="contact-role">Business Development</div>
+        <a href="mailto:mike@genhealth.ai" class="contact-email">mike@genhealth.ai</a>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-2" style="margin-top: 3rem;">
+      <a href="mailto:ethan@genhealth.ai?subject=GenHealth%20Health%20Plan%20Inquiry&body=I%27d%20like%20to%20schedule%20a%20discussion%20about%20GenHealth%20for%20our%20health%20plan." class="cta-btn" style="font-size: 1rem; padding: 1rem 2.5rem;">
+        Schedule a Conversation →
+      </a>
+    </div>
+
+    <div class="reveal reveal-delay-3" style="margin-top: 2.5rem; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        HIPAA Compliant
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        SOC 2
+      </span>
+      <span class="compliance-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        FHIR Native
+      </span>
+    </div>
+
+    <div class="reveal reveal-delay-4" style="margin-top: 3rem;">
+      <p style="font-size: 0.75rem; color: var(--text-muted);">
+        © 2025 GenHealth.ai — Confidential
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  // ============ SLIDE TRACKING ============
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  const progressBar = document.getElementById('progress-bar');
+  const currentSlideEl = document.getElementById('current-slide');
+  const totalSlidesEl = document.getElementById('total-slides');
+  const nav = document.getElementById('nav');
+  
+  totalSlidesEl.textContent = totalSlides;
+  
+  let currentSlide = 0;
+  let isScrolling = false;
+  let lastScrollY = window.scrollY;
+
+  // ============ PROGRESS & NAV UPDATE ============
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+    
+    // Find current slide
+    let activeSlide = 0;
+    slides.forEach((slide, i) => {
+      const rect = slide.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.4) {
+        activeSlide = i;
+      }
+    });
+    currentSlide = activeSlide;
+    currentSlideEl.textContent = activeSlide + 1;
+    
+    // Hide/show nav
+    if (scrollTop > lastScrollY && scrollTop > 100) {
+      nav.classList.add('hidden');
+    } else {
+      nav.classList.remove('hidden');
+    }
+    lastScrollY = scrollTop;
+  }
+
+  // ============ NAVIGATION ============
+  function goToSlide(index) {
+    if (index >= 0 && index < totalSlides) {
+      slides[index].scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function nextSlide() {
+    goToSlide(currentSlide + 1);
+  }
+
+  function prevSlide() {
+    goToSlide(currentSlide - 1);
+  }
+
+  // Expose to global for nav buttons
+  window.nextSlide = nextSlide;
+  window.prevSlide = prevSlide;
+
+  // ============ KEYBOARD NAVIGATION ============
+  document.addEventListener('keydown', function(e) {
+    switch(e.key) {
+      case 'ArrowDown':
+      case 'ArrowRight':
+      case ' ':
+        e.preventDefault();
+        nextSlide();
+        break;
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        e.preventDefault();
+        prevSlide();
+        break;
+      case 'Home':
+        e.preventDefault();
+        goToSlide(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        goToSlide(totalSlides - 1);
+        break;
+    }
+  });
+
+  // ============ SCROLL REVEAL ANIMATIONS ============
+  const revealElements = document.querySelectorAll('.reveal');
+  
+  const revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  });
+  
+  revealElements.forEach(function(el) {
+    revealObserver.observe(el);
+  });
+
+  // ============ SCROLL LISTENER ============
+  let scrollTimeout;
+  window.addEventListener('scroll', function() {
+    updateProgress();
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(updateProgress, 100);
+  }, { passive: true });
+
+  // ============ TOUCH SUPPORT ============
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  document.addEventListener('touchstart', function(e) {
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    touchEndY = e.changedTouches[0].screenY;
+    const diff = touchStartY - touchEndY;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+  }, { passive: true });
+
+  // ============ ANCHOR LINK SUPPORT ============
+  document.querySelectorAll('a[href^="#slide-"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // ============ INITIAL STATE ============
+  updateProgress();
+  
+  // Trigger reveals for first slide
+  setTimeout(function() {
+    slides[0].querySelectorAll('.reveal').forEach(function(el) {
+      el.classList.add('visible');
+    });
+  }, 100);
+})();
+</script>
+
+</body>
+</html>
