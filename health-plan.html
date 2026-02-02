@@ -1869,12 +1869,31 @@ h1, h2, h3, h4 {
   const currentSlideEl = document.getElementById('current-slide');
   const totalSlidesEl = document.getElementById('total-slides');
   const nav = document.getElementById('nav');
+  const slideNav = document.getElementById('slide-nav');
   
   totalSlidesEl.textContent = totalSlides;
   
   let currentSlide = 0;
   let isScrolling = false;
   let lastScrollY = window.scrollY;
+
+  // ============ BUILD SLIDE NAV DOTS ============
+  const slideTitles = [
+    'GenHealth.ai', 'Team', 'CMS 0057', 'Pain Points', 'Solution',
+    'Case Study', 'Workflow', 'Prior Auth', 'UM & Summaries', 'Compliance',
+    'Platform', 'ROI', 'Implementation', 'Pricing', 'Let\u2019s Talk'
+  ];
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.setAttribute('data-title', slideTitles[i] || 'Slide ' + (i + 1));
+    dot.addEventListener('click', () => goToSlide(i));
+    slideNav.appendChild(dot);
+  });
+
+  const dots = document.querySelectorAll('.nav-dot');
 
   // ============ PROGRESS & NAV UPDATE ============
   function updateProgress() {
@@ -1893,6 +1912,7 @@ h1, h2, h3, h4 {
     });
     currentSlide = activeSlide;
     currentSlideEl.textContent = activeSlide + 1;
+    dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
     
     // Hide/show nav
     if (scrollTop > lastScrollY && scrollTop > 100) {
