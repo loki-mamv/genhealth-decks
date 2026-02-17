@@ -738,6 +738,16 @@ h1, h2, h3, h4 {
   color: var(--text-muted);
 }
 .product-detail { display: none; }
+.product-cta {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.product-card:hover .product-cta { opacity: 1; }
 
 /* Lightbox */
 .lightbox-overlay {
@@ -1178,6 +1188,7 @@ h1, h2, h3, h4 {
         <div class="product-label">
           <div class="product-title">Document Intake</div>
           <div class="product-desc">OCR extraction from faxed orders into structured data</div>
+          <div class="product-cta"><i class="fas fa-expand-alt"></i> Click to expand</div>
         </div>
         <div class="product-detail">Faxed referrals and prescriptions are automatically read via OCR, extracting patient demographics, diagnosis codes, HCPCS codes, physician details, and device specifications into structured fields — ready for EHR entry and PA submission with zero manual data entry.</div>
       </div>
@@ -1189,6 +1200,7 @@ h1, h2, h3, h4 {
         <div class="product-label">
           <div class="product-title">Policy Qualification</div>
           <div class="product-desc">Medical necessity logic &amp; documentation checklists</div>
+          <div class="product-cta"><i class="fas fa-expand-alt"></i> Click to expand</div>
         </div>
         <div class="product-detail">Each procedure is matched against payer-specific coverage policies (LCDs, policy articles, medical necessity criteria). The system walks through qualification questions step-by-step, checking clinical documentation against every requirement before submission.</div>
       </div>
@@ -1200,6 +1212,7 @@ h1, h2, h3, h4 {
         <div class="product-label">
           <div class="product-title">AI Document Chat</div>
           <div class="product-desc">Ask questions, extract data, verify details instantly</div>
+          <div class="product-cta"><i class="fas fa-expand-alt"></i> Click to expand</div>
         </div>
         <div class="product-detail">Staff can ask natural-language questions about any document — "who is the prescriber?", "what codes are listed?" — and get instant answers with citations mapped directly to the source document. No more hunting through pages of faxed records.</div>
       </div>
