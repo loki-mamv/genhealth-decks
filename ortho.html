@@ -680,6 +680,127 @@ h1, h2, h3, h4 {
   pointer-events: none;
 }
 .logo-mark { display: none !important; }
+/* ─── Product Cards with Hover/Lightbox ─── */
+.product-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+.product-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(11,109,238,0.15);
+}
+.product-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.product-img-wrap img {
+  width: 100%;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.product-card:hover .product-img-wrap img {
+  transform: scale(1.03);
+}
+.product-zoom-hint {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.product-card:hover .product-zoom-hint { opacity: 1; }
+.product-label {
+  padding: 12px 16px;
+  background: var(--bg-card);
+}
+.product-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+.product-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.product-detail { display: none; }
+
+/* Lightbox */
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  animation: lbFadeIn 0.25s ease;
+}
+.lightbox-overlay.active { display: flex; }
+@keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.lightbox-content {
+  max-width: 1000px;
+  width: 100%;
+  background: var(--bg-card);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  position: relative;
+  animation: lbSlideUp 0.3s ease;
+}
+@keyframes lbSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.lightbox-content img {
+  width: 100%;
+  display: block;
+}
+.lightbox-caption {
+  padding: 20px 24px;
+}
+.lightbox-caption .product-title {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+.lightbox-caption #lightbox-detail {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.lightbox-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.2s;
+}
+.lightbox-close:hover { background: rgba(0,0,0,0.7); }
 </style>
 </head>
 <body>
@@ -1048,26 +1169,50 @@ h1, h2, h3, h4 {
     <p class="slide-subtitle reveal reveal-delay-1">
       A single dashboard to manage your entire authorization workflow — from intake to approval to appeal.
     </p>
-    <div class="grid-3 reveal reveal-delay-2">
-      <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:center;">
-        <img src="img-intake.png" alt="Document Intake — OCR & data extraction" style="width:100%;display:block;">
-        <div style="padding:12px 16px;background:var(--bg-card);">
-          <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">Document Intake</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);">OCR extraction from faxed orders into structured data</div>
+    <div class="grid-3 reveal reveal-delay-2 product-grid">
+      <div class="product-card" onclick="openLightbox(this)">
+        <div class="product-img-wrap">
+          <img src="img-intake.png" alt="Document Intake — OCR & data extraction">
+          <div class="product-zoom-hint"><i class="fas fa-expand"></i></div>
         </div>
-      </div>
-      <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:center;">
-        <img src="img-qualify.png" alt="Policy Qualification — documentation checklist" style="width:100%;display:block;">
-        <div style="padding:12px 16px;background:var(--bg-card);">
-          <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">Policy Qualification</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);">Medical necessity logic &amp; documentation checklists</div>
+        <div class="product-label">
+          <div class="product-title">Document Intake</div>
+          <div class="product-desc">OCR extraction from faxed orders into structured data</div>
         </div>
+        <div class="product-detail">Faxed referrals and prescriptions are automatically read via OCR, extracting patient demographics, diagnosis codes, HCPCS codes, physician details, and device specifications into structured fields — ready for EHR entry and PA submission with zero manual data entry.</div>
       </div>
-      <div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.06);text-align:center;">
-        <img src="img-chat.png" alt="AI Chat — document Q&A" style="width:100%;display:block;">
-        <div style="padding:12px 16px;background:var(--bg-card);">
-          <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">AI Document Chat</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);">Ask questions, extract data, verify details instantly</div>
+      <div class="product-card" onclick="openLightbox(this)">
+        <div class="product-img-wrap">
+          <img src="img-qualify.png" alt="Policy Qualification — documentation checklist">
+          <div class="product-zoom-hint"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="product-label">
+          <div class="product-title">Policy Qualification</div>
+          <div class="product-desc">Medical necessity logic &amp; documentation checklists</div>
+        </div>
+        <div class="product-detail">Each procedure is matched against payer-specific coverage policies (LCDs, policy articles, medical necessity criteria). The system walks through qualification questions step-by-step, checking clinical documentation against every requirement before submission.</div>
+      </div>
+      <div class="product-card" onclick="openLightbox(this)">
+        <div class="product-img-wrap">
+          <img src="img-chat.png" alt="AI Chat — document Q&A">
+          <div class="product-zoom-hint"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="product-label">
+          <div class="product-title">AI Document Chat</div>
+          <div class="product-desc">Ask questions, extract data, verify details instantly</div>
+        </div>
+        <div class="product-detail">Staff can ask natural-language questions about any document — "who is the prescriber?", "what codes are listed?" — and get instant answers with citations mapped directly to the source document. No more hunting through pages of faxed records.</div>
+      </div>
+    </div>
+
+    <!-- Lightbox overlay -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+      <div class="lightbox-content">
+        <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-caption">
+          <div id="lightbox-title" class="product-title"></div>
+          <div id="lightbox-detail"></div>
         </div>
       </div>
     </div>
@@ -1282,5 +1427,29 @@ h1, h2, h3, h4 {
 })();
 </script>
 
+<script>
+function openLightbox(card) {
+  const img = card.querySelector('.product-img-wrap img');
+  const title = card.querySelector('.product-title').textContent;
+  const detail = card.querySelector('.product-detail').textContent;
+  document.getElementById('lightbox-img').src = img.src;
+  document.getElementById('lightbox-title').textContent = title;
+  document.getElementById('lightbox-detail').textContent = detail;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+  if (e.target === document.getElementById('lightbox') || e.currentTarget.classList.contains('lightbox-close')) {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+</script>
 </body>
 </html>
